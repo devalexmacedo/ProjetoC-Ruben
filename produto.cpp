@@ -54,6 +54,4 @@ struct Produto {
 
 int main () {
     exibirMenu();
-
-    return 0;
 }
