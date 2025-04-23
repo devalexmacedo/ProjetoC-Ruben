@@ -58,6 +58,17 @@ void mostrarEstoque() {
         cout << estoque[i];
     }
 }
+//função para verificar se o produto escolhido tem no estoque
+void checarProdutoEstoque(){
+    //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
+    Produto* produtoSelecionado = nullptr;
+    for (int j = 0; j < tamEstoque; j++) {
+        if (estoque[j].id == idProduto) {
+        produtoSelecionado = &estoque[j];
+        break;
+        }
+    }
+}
 
 // Função para gerar venda aleatória grátis a cada 4 compras
 int vendaGratis() {
@@ -76,28 +87,23 @@ float calcIVA(float precoTotal) {
 
 //Função para escolher os produtos e a quantidade.
 void venda() {
-    mostrarEstoque();
     int qtdProdutoVenda, idProduto, qtdVenda, numCliente, numFatura = 1;
     float valorPago, totalComIVA, IVA, precoTotal, precoUnit, troco;
-    //Cria um ponteiro para indicar um local no estoque com a posição vazia para não indicar posição com lixo.
-    Produto* produtoSelecionado = nullptr;
+
+    mostrarEstoque();
+    checarProdutoEstoque();
 
     cout << "Inserir a quantidade de produtos desejados: ";
     cin >> qtdProdutoVenda;
-    for (int i = 0; i < qtdProdutoVenda; i++) {
-        cout << "Digite o id do produto que deseja: ";
+    Produto* produtoSelecionado = nullptr;
+    
+    for (int i = 1; i <= qtdProdutoVenda; i++) {
+        cout << "Digite o id do produto: ";
         cin >> idProduto;
         produtoSelecionado = &estoque[idProduto];
         cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
         cin >> qtdVenda;
         
-        //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
-        for (int j = 0; j < tamEstoque; j++) {
-            if (estoque[j].id == idProduto) {
-            produtoSelecionado = &estoque[j];
-            break;
-            }
-        }
         //caso o id digitado não esteja na lista, informa que não foi encontrado.
         if (!produtoSelecionado) {
             cout << "Produto nao encontrado.\n";
