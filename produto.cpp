@@ -9,23 +9,23 @@
 using namespace std;
 
 
-//Estrutura do produto
+//Estrutura do produto.
 struct Produto {
     int id;
     string nome;
     int quantidade;
     float precoCusto;
 };
-//função que diz ao cout como mostrar item por item
+//função que diz ao cout como mostrar item por item.
 ostream& operator<<(ostream& os, const Produto& p) {
     os << "ID: " << p.id << " | "
        << "Nome: " << p.nome << " | "
        << "Quantidade: " << p.quantidade << " | "
-       << "Preco: €" << p.precoCusto << endl;
+       << "Preco: " << p.precoCusto << endl;
     return os;
 }
 
-//Insere produtos no estoque
+//Insere produtos no estoque.
 Produto estoque[] = {
     {1, "Placa Mae ASUS B550", 20, 85.00},
     {2, "Processador Ryzen 5 5600X", 20, 140.00},
@@ -49,7 +49,7 @@ Produto estoque[] = {
     {20, "Base Refrigerada Notebook", 20, 14.00}
 };
 
-//Calcula o tamanho do estoque para o usar o ciclo de repetição 
+//Calcula o tamanho do estoque para o usar o ciclo de repetição.
 const int tamEstoque = sizeof (estoque) / sizeof (estoque[0]);
 
 //função mostrar estoque
@@ -58,26 +58,106 @@ void mostrarEstoque() {
         cout << estoque[i];
     }
 }
-//Função para escolher os produtos e a quantidade
-void selecionarProduto() {
-    int qtdProdutoVenda, idProduto, qtdVenda;
-    float valorPago;
+
+// Função para gerar venda aleatória grátis a cada 4 compras
+int vendaGratis() {
+    return rand() % 4 == 0; 
+}
+
+// Função para adicionar 30% ao valor de custo
+float calcValorVenda(float precoCusto) {
+    return precoCusto * 1.3; 
+}
+
+// Função para calular o iva
+float calcIVA(float precoTotal) {
+    return precoTotal * 0.23; 
+}
+
+//Função para escolher os produtos e a quantidade.
+void venda() {
+    mostrarEstoque();
+    int qtdProdutoVenda, idProduto, qtdVenda, numCliente, numFatura = 1;
+    float valorPago, totalComIVA, IVA, precoTotal, precoUnit, troco;
+    //Cria um ponteiro para indicar um local no estoque com a posição vazia para não indicar posição com lixo.
+    Produto* produtoSelecionado = nullptr;
 
     cout << "Inserir a quantidade de produtos desejados: ";
     cin >> qtdProdutoVenda;
-        for (int i = 0; i < qtdProdutoVenda; i++) {
-            cout << "Digite o id do produto que deseja: ";
-            cin >> idProduto;
-            cout << "Digite a quantidade do produto que deseja: ";
-            cin >> qtdVenda;
-                for (int j = 0; j < tamEstoque; j++) {
-
-                }
-
-
+    for (int i = 0; i < qtdProdutoVenda; i++) {
+        cout << "Digite o id do produto que deseja: ";
+        cin >> idProduto;
+        produtoSelecionado = &estoque[idProduto];
+        cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
+        cin >> qtdVenda;
+        
+        //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
+        for (int j = 0; j < tamEstoque; j++) {
+            if (estoque[j].id == idProduto) {
+            produtoSelecionado = &estoque[j];
+            break;
+            }
         }
+        //caso o id digitado não esteja na lista, informa que não foi encontrado.
+        if (!produtoSelecionado) {
+            cout << "Produto nao encontrado.\n";
+            return;
+        }
+        //caso a quantidade vendida seja maior que o estoque, informa que não tem disponibilidade.
+        if (qtdVenda > produtoSelecionado->quantidade) {
+            cout << "Quantidade em stock insuficiente.\n";
+            return;
+        }
+        precoUnit = calcValorVenda(produtoSelecionado->precoCusto);
+        precoTotal = precoUnit * qtdVenda;
+        IVA = calcIVA(precoTotal);
+        totalComIVA = precoTotal + IVA;
+    }
 
+    //verifica se a venda sorteada é verdadeira e coloca o Total = 0
+    bool vendaSorteada = vendaGratis();
+    if (vendaSorteada) {
+        totalComIVA = 0;
+        IVA = 0;
+        cout << "Informe ao cliente que a venda dele foi sorteada e será gratis.\n";
+    }
+
+    cout << "Digite o Numero do cliente: ";
+    cin >> numCliente;
+
+    cout << "Total a pagar: " << totalComIVA << " euros\n";
+    
+    if (!vendaSorteada) {
+        cout << "Inserir o valor pago: ";
+        cin >> valorPago;
+    } else {
+        valorPago = 0;
+    }
+
+    troco = valorPago - totalComIVA;
+
+    //diminui os produtos vendidos do estoque
+    produtoSelecionado->quantidade -= qtdVenda;
+
+    //imprir talão
+    time_t t = time(nullptr);
+    tm* dataAtual = localtime(&t);
+
+    cout << "\n======= TALAO DE COMPRA =======\n";
+    cout << "Fatura N: " << numFatura++ << endl;
+    cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << endl;
+    cout << "Cliente N: " << numCliente << endl;
+    cout << "Produto: " << produtoSelecionado->nome << endl;
+    cout << "Quantidade: " << qtdVenda << endl;
+    cout << "Preço s/IVA: " << precoTotal << " euros" << endl;
+    cout << "IVA (23%): " << IVA << " euros" << endl;
+    cout << "Total c/IVA: " << totalComIVA << " euros" << endl;
+    cout << "Valor Entregue: " << valorPago << " euros" << endl;
+    cout << "Troco: " << troco << " euros" << endl;
+    cout << "===============================\n";
 }
+  
+
 //função menu
 void exibirMenu() {
     int opcao;
@@ -95,7 +175,7 @@ void exibirMenu() {
         switch (opcao) {
             case 1:
                 // chamar função de venda aqui
-                mostrarEstoque();
+                venda();
                 break;
             case 2:
                 // chamar função de criação
