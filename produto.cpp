@@ -59,12 +59,12 @@ void mostrarEstoque() {
     }
 }
 //função para verificar se o produto escolhido tem no estoque
-void checarProdutoEstoque(){
+void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado){
     //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
-    Produto* produtoSelecionado = nullptr;
-    for (int j = 0; j < tamEstoque; j++) {
-        if (estoque[j].id == idProduto) {
-        produtoSelecionado = &estoque[j];
+    produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para não haver lixo
+    for (int i = 0; i < tamEstoque; i++) {
+        if (estoque[i].id == idProduto) {
+        produtoSelecionado = &estoque[i];
         break;
         }
     }
@@ -86,82 +86,110 @@ float calcIVA(float precoTotal) {
 }
 
 //Função para escolher os produtos e a quantidade.
-void venda() {
-    int qtdProdutoVenda, idProduto, qtdVenda, numCliente, numFatura = 1;
-    float valorPago, totalComIVA, IVA, precoTotal, precoUnit, troco;
+// void venda() {
+//     int qtdProdutoVenda, idProduto, qtdVenda, numCliente;
+//     static int numFatura = 1;
+//     float valorPago, IVA, precoTotal, precoUnit, troco, totalComIVA=0;
+//     //coloca o apontador do produto selecionado a nulo.
+//     Produto* produtoSelecionado = nullptr; // Já declarado fora do loop
 
-    mostrarEstoque();
-    checarProdutoEstoque();
-
-    cout << "Inserir a quantidade de produtos desejados: ";
-    cin >> qtdProdutoVenda;
-    Produto* produtoSelecionado = nullptr;
+//     mostrarEstoque();
     
-    for (int i = 1; i <= qtdProdutoVenda; i++) {
-        cout << "Digite o id do produto: ";
-        cin >> idProduto;
-        produtoSelecionado = &estoque[idProduto];
-        cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
-        cin >> qtdVenda;
+//     cout << "Inserir a quantidade de produtos desejados: ";
+//     cin >> qtdProdutoVenda;
+
+//     //iniciar Matriz
+//     float mat[qtdProdutoVenda][5];
+    
+//     for (int i = 0; i < qtdProdutoVenda; i++) {
+//         cout << "Digite o id do produto: ";
+//         cin >> idProduto;
+//         checarProdutoEstoque(idProduto, produtoSelecionado);
+//         produtoSelecionado = &estoque[idProduto-1];
+//         cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
+//         cin >> qtdVenda;
         
-        //caso o id digitado não esteja na lista, informa que não foi encontrado.
-        if (!produtoSelecionado) {
-            cout << "Produto nao encontrado.\n";
-            return;
-        }
-        //caso a quantidade vendida seja maior que o estoque, informa que não tem disponibilidade.
-        if (qtdVenda > produtoSelecionado->quantidade) {
-            cout << "Quantidade em stock insuficiente.\n";
-            return;
-        }
-        precoUnit = calcValorVenda(produtoSelecionado->precoCusto);
-        precoTotal = precoUnit * qtdVenda;
-        IVA = calcIVA(precoTotal);
-        totalComIVA = precoTotal + IVA;
-    }
+//         //caso o id digitado não esteja na lista, informa que não foi encontrado.
+//         if (!produtoSelecionado) {
+//             cout << "Produto nao encontrado.\n";
+//             return;
+//         }
+//         //caso a quantidade vendida seja maior que o estoque, informa que não tem disponibilidade.
+//         if (qtdVenda > produtoSelecionado->quantidade) {
+//             cout << "Quantidade em stock insuficiente.\n";
+//             qtdProdutoVenda--;
+//             mostrarEstoque();
+//             continue;
+//         }
+              
+//         precoUnit = calcValorVenda(produtoSelecionado->precoCusto);
+//         precoTotal = precoUnit * qtdVenda;
+//         IVA = calcIVA(precoTotal);
+//         totalComIVA = precoTotal + IVA;
 
-    //verifica se a venda sorteada é verdadeira e coloca o Total = 0
-    bool vendaSorteada = vendaGratis();
-    if (vendaSorteada) {
-        totalComIVA = 0;
-        IVA = 0;
-        cout << "Informe ao cliente que a venda dele foi sorteada e será gratis.\n";
-    }
-
-    cout << "Digite o Numero do cliente: ";
-    cin >> numCliente;
-
-    cout << "Total a pagar: " << totalComIVA << " euros\n";
+//         mat[i][0] = idProduto;
+//         mat[i][1] = qtdVenda;
+//         mat[i][2] = precoTotal;
+//         mat[i][3] = IVA;
+//         mat[i][4] = totalComIVA;
     
-    if (!vendaSorteada) {
-        cout << "Inserir o valor pago: ";
-        cin >> valorPago;
-    } else {
-        valorPago = 0;
-    }
+//     //diminui os produtos vendidos do estoque
+//     produtoSelecionado -> quantidade -= qtdVenda;
 
-    troco = valorPago - totalComIVA;
+//     mostrarEstoque();
+//     }
 
-    //diminui os produtos vendidos do estoque
-    produtoSelecionado->quantidade -= qtdVenda;
+//     //verifica se a venda sorteada é verdadeira e coloca o Total = 0
+//     bool vendaSorteada = vendaGratis();
+//     if (vendaSorteada) {
+//         totalComIVA = 0;
+//         IVA = 0;
+//         cout << "Informe ao cliente que a venda dele foi sorteada e será gratis.\n";
+//     }
 
-    //imprir talão
-    time_t t = time(nullptr);
-    tm* dataAtual = localtime(&t);
+//     cout << "Digite o Numero do cliente: ";
+//     cin >> numCliente;
 
-    cout << "\n======= TALAO DE COMPRA =======\n";
-    cout << "Fatura N: " << numFatura++ << endl;
-    cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << endl;
-    cout << "Cliente N: " << numCliente << endl;
-    cout << "Produto: " << produtoSelecionado->nome << endl;
-    cout << "Quantidade: " << qtdVenda << endl;
-    cout << "Preço s/IVA: " << precoTotal << " euros" << endl;
-    cout << "IVA (23%): " << IVA << " euros" << endl;
-    cout << "Total c/IVA: " << totalComIVA << " euros" << endl;
-    cout << "Valor Entregue: " << valorPago << " euros" << endl;
-    cout << "Troco: " << troco << " euros" << endl;
-    cout << "===============================\n";
-}
+//     //calcula o valor total usando um operador ternário
+//     float somaTotal = 0;
+//     for (int i = 0; i < qtdProdutoVenda; ++i) {
+//         somaTotal += vendaSorteada ? 0 : mat[i][4];
+//     }
+//     //Verifica se a venda foi sorteada, caso não informa o valor total e pede o valor pago pelo cliente para calcular o troco
+//     if (!vendaSorteada) {
+//         cout << "Total a pagar: " << somaTotal << " euros\n";
+//         cout << "Inserir o valor pago: ";
+//         cin >> valorPago;
+//     } else {
+//         valorPago = 0;
+//     }
+    
+//     troco = valorPago - somaTotal;
+
+//     //imprir talão
+//     time_t t = time(nullptr);
+//     tm* dataAtual = localtime(&t);
+
+//     cout << "\n======= TALAO DE COMPRA =======\n";
+//     cout << "Fatura N: " << numFatura++ << endl;
+//     cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << endl;
+//     cout << "Cliente N: " << numCliente << endl;
+//     for (int i = 0; i < qtdProdutoVenda; i++) {
+//         int produtoTalao = static_cast<int>(mat[i][0]);
+//         Produto* produtoTalao = nullptr;
+//         if (produtoTalao) {
+//             cout << "Produto: " << produtoTalao->nome << endl;
+//             cout << "Preço Unitário: " << calcValorVenda(produtoTalao->precoCusto) << " euros" << endl;
+//             cout << "Quantidade: " << static_cast<int>(mat[i][1]) << endl;
+//             cout << "Preço s/IVA do produto: " << mat[i][2] << " euros" << endl;
+//             cout << "IVA (23%): " << mat[i][3] << " euros" << endl;
+//         }
+//     }
+//     cout << "Total c/IVA: " << somaTotal << " euros" << endl;
+//     cout << "Valor Entregue: " << valorPago << " euros" << endl;
+//     cout << "Troco: " << troco << " euros" << endl;
+//     cout << "===============================\n";
+// }
   
 
 //função menu
@@ -190,7 +218,7 @@ void exibirMenu() {
                 // chamar função de eliminação
                 break;
             case 4:
-                // mostrar stock
+                // chamar função mostrar estoque
                 mostrarEstoque();
                 break;
             case 5:
