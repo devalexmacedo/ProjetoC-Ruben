@@ -3,7 +3,8 @@
 #include <ctime>
 #include <cstdlib>
 #include <string>
-#include <locale.h>
+#include <locale.h> // Para permitir caracteres especiais
+#include <conio.h> // Adicionado para usar o comando _getch, que interrompe limpezas de tela for de hora esperando um input do user
 
 
 using namespace std;
@@ -50,12 +51,13 @@ Produto estoque[] = {
 };
 
 //Calcula o tamanho do estoque para o usar o ciclo de repetição.
-const int tamEstoque = sizeof(estoque) / sizeof(estoque[0]);
+int tamEstoque = sizeof(estoque) / sizeof(estoque[0]);
 
 //função mostrar estoque
 void mostrarEstoque() {
     for (int i = 0; i < tamEstoque; i++) {
-        cout << estoque[i];
+        if (estoque[i].quantidade != 0)
+            cout << estoque[i];
     }
 }
 //função para verificar se o produto escolhido tem no estoque
@@ -76,14 +78,14 @@ int vendaGratis() {
 }
 
 // Função para adicionar 30% ao valor de custo
-//float calcValorVenda(float precoCusto) {
-//    return precoCusto * 1.3;
-//}
+float calcValorVenda(float precoCusto) {
+    return precoCusto * 1.3;
+}
 
 // Função para calular o iva
-//float calcIVA(float precoTotal) {
-//    return precoTotal * 0.23;
-//}
+float calcIVA(float precoTotal) {
+    return precoTotal * 0.23;
+}
 
 void removerProduto() {
     // Mostra o estoque pra o utilizador ver o que quer remover
@@ -95,14 +97,32 @@ void removerProduto() {
 
     Produto* produtoSelecionado = &estoque[idProduto];
     for (int i = 0; i < tamEstoque; i++) {
-        cout << "Produto removido";
+        cout << "Produto removido\n";
         checarProdutoEstoque(idProduto, produtoSelecionado);
         produtoSelecionado = &estoque[idProduto - 1];
         produtoSelecionado->quantidade = 0;
         break;
     }
+    _getch();
 }
 
+void adicionarProduto() { // FUNçÂO COM PROBLEMA, CONSERTA(Primeiro caractere errado, espaços dão problema, e inserção de char em int da problema)
+    // A função usa o item no index tamanho estoque, pois este vai sempre ser o ultimo item do array
+    // Id atribuido é um a mais do que o tamanho do estoque, que seria o ultimo id por default
+    estoque[tamEstoque].id = tamEstoque + 1;
+
+    cout << "Insira o nome do novo artigo: ";
+    cin >> estoque[tamEstoque].nome;
+    cout << "Insira o custo: ";
+    cin >> estoque[tamEstoque].precoCusto;
+    cout << "Insira a quantidade em stock: ";
+    cin >> estoque[tamEstoque].quantidade;
+
+    // Aumenta o tamanho do estoque para que mais adições sejam possiveis
+    tamEstoque++;
+    cout << "Artigo adicionado.";
+    _getch();
+}
 
 //Função para escolher os produtos e a quantidade.
 // void venda() {
@@ -111,15 +131,15 @@ void removerProduto() {
 //     float valorPago, IVA, precoTotal, precoUnit, troco, totalComIVA=0;
 //     //coloca o apontador do produto selecionado a nulo.
 //     Produto* produtoSelecionado = nullptr; // Já declarado fora do loop
-//
+
 //     mostrarEstoque();
-//
+
 //     cout << "Inserir a quantidade de produtos desejados: ";
 //     cin >> qtdProdutoVenda;
-//
+
 //     //iniciar Matriz
 //     float mat[qtdProdutoVenda][5];
-//
+
 //     for (int i = 0; i < qtdProdutoVenda; i++) {
 //         cout << "Digite o id do produto: ";
 //         cin >> idProduto;
@@ -127,7 +147,7 @@ void removerProduto() {
 //         produtoSelecionado = &estoque[idProduto-1];
 //         cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
 //         cin >> qtdVenda;
-//
+
 //         //caso o id digitado não esteja na lista, informa que não foi encontrado.
 //         if (!produtoSelecionado) {
 //             cout << "Produto nao encontrado.\n";
@@ -140,24 +160,24 @@ void removerProduto() {
 //             mostrarEstoque();
 //             continue;
 //         }
-//
+
 //         precoUnit = calcValorVenda(produtoSelecionado->precoCusto);
 //         precoTotal = precoUnit * qtdVenda;
 //         IVA = calcIVA(precoTotal);
 //         totalComIVA = precoTotal + IVA;
-//
+
 //         mat[i][0] = idProduto;
 //         mat[i][1] = qtdVenda;
 //         mat[i][2] = precoTotal;
 //         mat[i][3] = IVA;
 //         mat[i][4] = totalComIVA;
-//
+
 //     //diminui os produtos vendidos do estoque
 //     produtoSelecionado -> quantidade -= qtdVenda;
-//
+
 //     mostrarEstoque();
 //     }
-//
+
 //     //verifica se a venda sorteada é verdadeira e coloca o Total = 0
 //     bool vendaSorteada = vendaGratis();
 //     if (vendaSorteada) {
@@ -165,10 +185,10 @@ void removerProduto() {
 //         IVA = 0;
 //         cout << "Informe ao cliente que a venda dele foi sorteada e será gratis.\n";
 //     }
-//
+
 //     cout << "Digite o Numero do cliente: ";
 //     cin >> numCliente;
-//
+
 //     //calcula o valor total usando um operador ternário
 //     float somaTotal = 0;
 //     for (int i = 0; i < qtdProdutoVenda; ++i) {
@@ -182,13 +202,13 @@ void removerProduto() {
 //     } else {
 //         valorPago = 0;
 //     }
-//
+
 //     troco = valorPago - somaTotal;
-//
+
 //     //imprir talão
 //     time_t t = time(nullptr);
 //     tm* dataAtual = localtime(&t);
-//
+
 //     cout << "\n======= TALAO DE COMPRA =======\n";
 //     cout << "Fatura N: " << numFatura++ << endl;
 //     cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << endl;
@@ -216,6 +236,8 @@ void exibirMenu() {
     int opcao;
     //menu com as interações do programa
     do {
+        system("cls"); // Limpa a tela toda a vez que uma opção é selecionada
+
         cout << "------MENU PRINCIPAL------" << endl;
         cout << "1. Efetuar Venda" << endl;
         cout << "2. Criar Novo Artigo" << endl;
@@ -228,10 +250,11 @@ void exibirMenu() {
         switch (opcao) {
         case 1:
             // chamar função de venda aqui
-            // venda();
+            //venda();
             break;
         case 2:
             // chamar função de criação
+            adicionarProduto();
             break;
         case 3:
             // chamar função de eliminação
@@ -240,12 +263,16 @@ void exibirMenu() {
         case 4:
             // chamar função mostrar estoque
             mostrarEstoque();
+            // System pause é utilizao para funções que não pedem por input, pra impedir a tela de limpar fora de hora
+            _getch();
             break;
         case 5:
-            cout << "Saindo do programa..." << endl;
+            cout << "Pressione qualquer tecla..." << endl;
+            _getch();
             break;
         default:
             cout << "Opcao invalida! Tente novamente." << endl;
+            _getch();
         }
 
         cout << endl;
