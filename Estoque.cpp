@@ -5,6 +5,7 @@
 #include <string>
 #include <locale.h> // Para permitir caracteres especiais
 #include <conio.h> // Adicionado para usar o comando _getch, que interrompe limpezas de tela for de hora esperando um input do user
+#include <vector>
 
 
 using namespace std;
@@ -17,6 +18,7 @@ struct Produto {
     int quantidade;
     float precoCusto;
 };
+
 //função que diz ao cout como mostrar item por item.
 ostream& operator<<(ostream& os, const Produto& p) {
     os << "ID: " << p.id << " | "
@@ -27,7 +29,7 @@ ostream& operator<<(ostream& os, const Produto& p) {
 }
 
 //Insere produtos no estoque.
-Produto estoque[] = {
+vector<Produto> estoque = {
     {1, "Placa Mae ASUS B550", 20, 85.00},
     {2, "Processador Ryzen 5 5600X", 20, 140.00},
     {3, "Memoria RAM 16GB DDR4", 20, 35.00},
@@ -50,21 +52,19 @@ Produto estoque[] = {
     {20, "Base Refrigerada Notebook", 20, 14.00}
 };
 
-//Calcula o tamanho do estoque para o usar o ciclo de repetição.
-int tamEstoque = sizeof(estoque) / sizeof(estoque[0]);
-
 //função mostrar estoque
 void mostrarEstoque() {
-    for (int i = 0; i < tamEstoque; i++) {
+    for (int i = 0; i < estoque.size(); i++) {
         if (estoque[i].quantidade != 0)
-            cout << estoque[i];
+            cout << fixed << setprecision(2) << estoque[i];
     }
 }
+
 //função para verificar se o produto escolhido tem no estoque
 void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
     //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
     produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para não haver lixo
-    for (int i = 0; i < tamEstoque; i++) {
+    for (int i = 0; i < estoque.size(); i++) {
         if (estoque[i].id == idProduto) {
             produtoSelecionado = &estoque[i];
             break;
@@ -88,40 +88,65 @@ float calcIVA(float precoTotal) {
 }
 
 void removerProduto() {
-    // Mostra o estoque pra o utilizador ver o que quer remover
     mostrarEstoque();
-    int idProduto;  // Id do produto que vai ser removido
+    int idProduto;
 
-    cout << "Insira o produto: ";
+    cout << "Insira o ID do produto: ";
     cin >> idProduto;
 
-    Produto* produtoSelecionado = &estoque[idProduto];
-    for (int i = 0; i < tamEstoque; i++) {
-        cout << "Produto removido\n";
-        checarProdutoEstoque(idProduto, produtoSelecionado);
-        produtoSelecionado = &estoque[idProduto - 1];
+    Produto* produtoSelecionado = nullptr; // Inicialmente não sabemos se o ID/Produto que o utilizador vai inserir existe, então inicializamos um ponteiro nulo que é atualizado
+    checarProdutoEstoque(idProduto, produtoSelecionado);
+
+    if (produtoSelecionado->quantidade == 0) { // Se o produto com este ID existir, mas não estiver mais em estoque. Tem de vir antes do if abaixo
+        cout << "Este produto já não está em estoque.";
+    }
+    else if (produtoSelecionado != nullptr) { // Se o produto existir
         produtoSelecionado->quantidade = 0;
-        break;
+        cout << "Produto removido.\n";
+    }
+    else { // O produto não existe
+        cout << "Produto com ID " << idProduto << " não encontrado.\n";
     }
     _getch();
 }
 
-void adicionarProduto() { // FUNçÂO COM PROBLEMA, CONSERTA(Primeiro caractere errado, espaços dão problema, e inserção de char em int da problema)
-    // A função usa o item no index tamanho estoque, pois este vai sempre ser o ultimo item do array
-    // Id atribuido é um a mais do que o tamanho do estoque, que seria o ultimo id por default
-    estoque[tamEstoque].id = tamEstoque + 1;
+void adicionarProduto() {  // PROBLEMA, NÂO CONSEGUE COMPARAR NOMES por alguma razão. IDs consegue
+
+    string nome;
+
+    cin.ignore(numeric_limits<std::streamsize>::max(), '\n'); // Necessario para limpar o buffer para usar o getline
 
     cout << "Insira o nome do novo artigo: ";
-    cin >> estoque[tamEstoque].nome;
-    cout << "Insira o custo: ";
-    cin >> estoque[tamEstoque].precoCusto;
-    cout << "Insira a quantidade em stock: ";
-    cin >> estoque[tamEstoque].quantidade;
+    getline(cin, nome); // Lê a linha inteira, permitindo espaços nos nomes 
 
-    // Aumenta o tamanho do estoque para que mais adições sejam possiveis
-    tamEstoque++;
-    cout << "Artigo adicionado.";
-    _getch();
+    for (int i = 0; i < estoque.size(); i++) {
+        if (estoque[i].nome == nome) { // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e começa a alterar o produto existente
+            cout << "Atualize a quantidade: ";
+            cin >> estoque[i].quantidade;
+            cout << "Artigo atualizado.";
+            _getch();
+            break;
+        }
+        else {
+            Produto p; // Novo produto que iremos adicionar ao array no final
+
+            p.nome = nome; // O nome do produto é o nome que inserimos acima
+            p.id = estoque.size() + 1; // Id atribuido é um a mais do que o tamanho do estoque, que seria o ultimo id por default
+
+            cout << "Insira o custo: ";
+            cin >> p.precoCusto;
+            cout << "Insira a quantidade: ";
+            cin >> p.quantidade;
+
+            // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adições sejam possiveis
+            estoque.push_back(p);
+
+            cout << "Artigo adicionado.";
+            cout << p.nome << "; " << nome << "; ";
+            _getch();
+            break;
+        }
+    }
 }
 
 //Função para escolher os produtos e a quantidade.
