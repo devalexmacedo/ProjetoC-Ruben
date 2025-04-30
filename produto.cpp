@@ -16,7 +16,8 @@ struct Produto {
     int quantidade;
     float precoCusto;
 };
-//função que diz ao cout como mostrar item por item.
+
+//função da biblioteca iostream para o cout conseguir ler os objetos da estrutura Produto.l
 ostream& operator<<(ostream& os, const Produto& p) {
     os << "ID: " << p.id << " | "
        << "Nome: " << p.nome << " | "
@@ -36,7 +37,7 @@ Produto estoque[] = {
     {7, "Caixa Mid Tower", 20, 40.00},
     {8, "Cooler CPU ARGB", 20, 25.00},
     {9, "Monitor 24'' Full HD", 20, 90.00},
-    {10, "Teclado Mecânico RGB", 20, 30.00},
+    {10, "Teclado Mecânico RGB", 20, 30.00}
     // {11, "Rato Gaming 7200 DPI", 20, 15.00},
     // {12, "Hub USB 3.0", 20, 10.00},
     // {13, "Adaptador Wi-Fi USB", 20, 12.00},
@@ -87,28 +88,29 @@ float calcIVA(float precoTotal) {
 
 //Função para escolher os produtos e a quantidade.
 void venda() {
-    int qtdProdutoVenda, idProduto, qtdVenda, numCliente;
+    int qtdProdutoVenda=0, idProduto, qtdVenda, numCliente;
     static int numFatura = 1;
     float valorPago, IVA, precoTotal, precoUnit, troco, totalComIVA=0;
     //coloca o apontador do produto selecionado a nulo.
     Produto* produtoSelecionado = nullptr; // Já declarado fora do loop
 
     mostrarEstoque();
-    
+    cout << endl;
     cout << "Inserir a quantidade de produtos desejados: ";
     cin >> qtdProdutoVenda;
-
+    cout << endl;
     //iniciar Matriz
     float mat[qtdProdutoVenda][5];
     
     for (int i = 0; i < qtdProdutoVenda; i++) {
         cout << "Digite o id do produto: ";
         cin >> idProduto;
+        cout << endl;
         checarProdutoEstoque(idProduto, produtoSelecionado);
         produtoSelecionado = &estoque[idProduto-1];
         cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
         cin >> qtdVenda;
-        
+        cout << endl;
         //caso o id digitado não esteja na lista, informa que não foi encontrado.
         if (!produtoSelecionado) {
             cout << "Produto nao encontrado.\n";
@@ -116,10 +118,17 @@ void venda() {
         }
         //caso a quantidade vendida seja maior que o estoque, informa que não tem disponibilidade.
         if (qtdVenda > produtoSelecionado->quantidade) {
-            cout << "Quantidade em stock insuficiente.\n";
-            qtdProdutoVenda--;
-            mostrarEstoque();
-            continue;
+            cout << "Quantidade em stock insuficiente para " << produtoSelecionado->nome << " (Estoque disponivell: " << produtoSelecionado->quantidade << ").\n";
+            cout << "Digite uma nova quantidade (ou 0 para cancelar este item): ";
+            cin >> qtdVenda;
+            cout << endl;
+            if (qtdVenda == 0) {
+                cout << "Item cancelado.\n";
+                continue; // Passa para o próximo produto
+            } else if (qtdVenda > produtoSelecionado->quantidade) {
+                cout << "Quantidade ainda insuficiente. Item cancelado.\n";
+                continue; // Passa para o próximo produto
+            }
         }
               
         precoUnit = calcValorVenda(produtoSelecionado->precoCusto);
@@ -132,11 +141,12 @@ void venda() {
         mat[i][2] = precoTotal;
         mat[i][3] = IVA;
         mat[i][4] = totalComIVA;
+        mat[i][5] = precoUnit;
+        
     
     //diminui os produtos vendidos do estoque
     produtoSelecionado -> quantidade -= qtdVenda;
 
-    mostrarEstoque();
     }
 
     //verifica se a venda sorteada é verdadeira e coloca o Total = 0
@@ -146,8 +156,7 @@ void venda() {
         IVA = 0;
         cout << "Informe ao cliente que a venda dele foi sorteada e será gratis.\n";
     }
-
-    cout << "Digite o Numero do cliente: ";
+    cout << "Digite o codigo do cliente: ";
     cin >> numCliente;
 
     //calcula o valor total usando um operador ternário
@@ -169,26 +178,31 @@ void venda() {
     //imprir talão
     time_t t = time(nullptr);
     tm* dataAtual = localtime(&t);
+    Produto* produtoSelecionadoTalao = nullptr;
 
     cout << "\n======= TALAO DE COMPRA =======\n";
     cout << "Fatura N: " << numFatura++ << endl;
     cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << endl;
     cout << "Cliente N: " << numCliente << endl;
+    cout << endl;
+    cout << "     Detalhes dos Produtos     " << endl;
+    cout << "---------------------------------\n";
     for (int i = 0; i < qtdProdutoVenda; i++) {
-        int produtoTalao = static_cast<int>(mat[i][0]);
-        // Produto* produtoTalao = nullptr;
-        if (produtoTalao) {
-            cout << "Produto: " << produtoTalao->nome << endl;
-            cout << "Preço Unitário: " << calcValorVenda(produtoTalao->precoCusto) << " euros" << endl;
+        int idProduto = mat[i][0];
+        produtoSelecionadoTalao = &estoque[idProduto];
+        if (produtoSelecionadoTalao) {
+            cout << "Produto: " << produtoSelecionadoTalao->nome << endl;
             cout << "Quantidade: " << static_cast<int>(mat[i][1]) << endl;
-            cout << "Preço s/IVA do produto: " << mat[i][2] << " euros" << endl;
+            cout << "Produto s/IVA: " << mat[i][2] << " euros" << endl;
             cout << "IVA (23%): " << mat[i][3] << " euros" << endl;
         }
+        cout << endl;
+        cout << "---------------------------------\n";
     }
     cout << "Total c/IVA: " << somaTotal << " euros" << endl;
-    cout << "Valor Entregue: " << valorPago << " euros" << endl;
+    cout << "Valor Pago: " << valorPago << " euros" << endl;
     cout << "Troco: " << troco << " euros" << endl;
-    cout << "===============================\n";
+    cout << "=====================================\n";
 }
   
 
@@ -197,15 +211,16 @@ void exibirMenu() {
     int opcao;
     //menu com as interações do programa
     do {
-        cout << "------MENU PRINCIPAL------" << endl;
+        cout << "======= MENU PRINCIPAL ========" << endl;
         cout << "1. Efetuar Venda" << endl;
         cout << "2. Criar Novo Artigo" << endl;
         cout << "3. Excluir Produto" << endl;
         cout << "4. Exibir Stock" << endl;
         cout << "5. Sair" << endl;
+        cout << endl;
         cout << "Escolha uma opcao: ";
         cin >> opcao;
-
+        cout << endl;
         switch (opcao) {
             case 1:
                 // chamar função de venda aqui
@@ -234,7 +249,7 @@ void exibirMenu() {
 }
 
 int main () {
-    setlocale (LC_ALL, "Portuguese");
+    setlocale (LC_ALL, "Portuguese, pt_BR.UTF-8");
 
     exibirMenu();
 }
