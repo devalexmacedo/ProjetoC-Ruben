@@ -30,7 +30,7 @@ ostream& operator<<(ostream& os, const Produto& p) {
 
 //Insere produtos no estoque.
 vector<Produto> estoque = {
-    {1, "Placa Mae ASUS B550", 20, 85.00},
+    {1, "Placa", 20, 85.00},
     {2, "Processador Ryzen 5 5600X", 20, 140.00},
     {3, "Memoria RAM 16GB DDR4", 20, 35.00},
     {4, "Disco SSD 1TB NVMe", 20, 55.00},
@@ -97,56 +97,57 @@ void removerProduto() {
     Produto* produtoSelecionado = nullptr; // Inicialmente não sabemos se o ID/Produto que o utilizador vai inserir existe, então inicializamos um ponteiro nulo que é atualizado
     checarProdutoEstoque(idProduto, produtoSelecionado);
 
-    if (produtoSelecionado->quantidade == 0) { // Se o produto com este ID existir, mas não estiver mais em estoque. Tem de vir antes do if abaixo
+    // Verifica se o produto existe
+    if (produtoSelecionado == nullptr) {
+        cout << "Produto com ID " << idProduto << " não encontrado.\n";
+    }
+    else if (produtoSelecionado->quantidade == 0) { // Se o produto existe, mas não está mais em estoque
         cout << "Este produto já não está em estoque.";
     }
-    else if (produtoSelecionado != nullptr) { // Se o produto existir
+    else { // O produto existe e está em estoque
         produtoSelecionado->quantidade = 0;
         cout << "Produto removido.\n";
     }
-    else { // O produto não existe
-        cout << "Produto com ID " << idProduto << " não encontrado.\n";
-    }
+
     _getch();
 }
 
-void adicionarProduto() {  // PROBLEMA, NÂO CONSEGUE COMPARAR NOMES por alguma razão. IDs consegue
+
+void adicionarProduto() {  
 
     string nome;
-
-    cin.ignore(numeric_limits<std::streamsize>::max(), '\n'); // Necessario para limpar o buffer para usar o getline
+    bool existe = false; // Flag inspeciona se o artigo já existe
 
     cout << "Insira o nome do novo artigo: ";
+    cin.ignore();
     getline(cin, nome); // Lê a linha inteira, permitindo espaços nos nomes 
 
     for (int i = 0; i < estoque.size(); i++) {
-        if (estoque[i].nome == nome) { // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e começa a alterar o produto existente
+        if (estoque[i].nome == nome) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e começa a alterar o produto existente
             cout << "Atualize a quantidade: ";
             cin >> estoque[i].quantidade;
             cout << "Artigo atualizado.";
-            _getch();
-            break;
-        }
-        else {
-            Produto p; // Novo produto que iremos adicionar ao array no final
-
-            p.nome = nome; // O nome do produto é o nome que inserimos acima
-            p.id = estoque.size() + 1; // Id atribuido é um a mais do que o tamanho do estoque, que seria o ultimo id por default
-
-            cout << "Insira o custo: ";
-            cin >> p.precoCusto;
-            cout << "Insira a quantidade: ";
-            cin >> p.quantidade;
-
-            // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adições sejam possiveis
-            estoque.push_back(p);
-
-            cout << "Artigo adicionado.";
-            cout << p.nome << "; " << nome << "; ";
-            _getch();
+            existe = true;
             break;
         }
     }
+    if (existe == false) {
+        Produto p; // Novo produto que iremos adicionar ao array no final
+
+        p.nome = nome; // O nome do produto é o nome que inserimos acima
+        p.id = estoque.size() + 1; // Id atribuido é um a mais do que o tamanho do estoque, que seria o ultimo id por default
+
+        cout << "Insira o custo: ";
+        cin >> p.precoCusto;
+        cout << "Insira a quantidade: ";
+        cin >> p.quantidade;
+
+        // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adições sejam possiveis
+        estoque.push_back(p);
+
+        cout << "Artigo adicionado.";
+    }
+    _getch();
 }
 
 //Função para escolher os produtos e a quantidade.
@@ -265,7 +266,7 @@ void exibirMenu() {
 
         cout << "------MENU PRINCIPAL------" << endl;
         cout << "1. Efetuar Venda" << endl;
-        cout << "2. Criar Novo Artigo" << endl;
+        cout << "2. Criar Novo Artigo/Atualizar Artigo" << endl;
         cout << "3. Excluir Produto" << endl;
         cout << "4. Exibir Stock" << endl;
         cout << "5. Sair" << endl;
