@@ -8,6 +8,8 @@
 #include <vector>
 #include <algorithm> // adicionador para verificar a igualdade entre strings: transform e tolower
 
+#pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS, necessario para usar o localtime
+
 
 using namespace std;
 
@@ -61,10 +63,10 @@ void mostrarEstoque() {
     }
 }
 
-//fun��o para verificar se o produto escolhido tem no estoque
+//função para verificar se o produto escolhido tem no estoque
 void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
     //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
-    produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para n�o haver lixo
+    produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para não haver lixo
     for (int i = 0; i < estoque.size(); i++) {
         if (estoque[i].id == idProduto) {
             produtoSelecionado = &estoque[i];
@@ -73,7 +75,7 @@ void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
     }
 }
 
-// Fun��o para gerar venda aleat�ria gr�tis a cada 4 compras
+// Fun��o para gerar venda aleatoria gratis a cada 4 compras
 int vendaGratis() {
     return rand() % 4 == 0;
 }
@@ -95,17 +97,17 @@ void removerProduto() {
     cout << "Insira o ID do produto: ";
     cin >> idProduto;
 
-    Produto* produtoSelecionado = nullptr; // Inicialmente n�o sabemos se o ID/Produto que o utilizador vai inserir existe, ent�o inicializamos um ponteiro nulo que � atualizado
+    Produto* produtoSelecionado = nullptr; // Inicialmente não sabemos se o ID/Produto que o utilizador vai inserir existe, ent�o inicializamos um ponteiro nulo que é atualizado
     checarProdutoEstoque(idProduto, produtoSelecionado);
 
     // Verifica se o produto existe
     if (produtoSelecionado == nullptr) {
-        cout << "Produto com ID " << idProduto << " n�o encontrado.\n";
+        cout << "Produto com ID " << idProduto << " não encontrado.\n";
     }
-    else if (produtoSelecionado->quantidade == 0) { // Se o produto existe, mas n�o est� mais em estoque
-        cout << "Este produto j� n�o est� em estoque.";
+    else if (produtoSelecionado->quantidade == 0) { // Se o produto existe, mas não está mais em estoque
+        cout << "Este produto jã não está em estoque.";
     }
-    else { // O produto existe e est� em estoque
+    else { // O produto existe e está em estoque
         produtoSelecionado->quantidade = 0;
         cout << "Produto removido.\n";
     }
@@ -119,9 +121,10 @@ string toMinuscula(string str) {
     return str;
 }
 
-void adicionarProduto() {  
+void adicionarProduto() {
 
     string nome;
+    int valorAdd;
     bool existe = false; // Flag inspeciona se o artigo j� existe
 
     cout << "Insira o nome do novo artigo: ";
@@ -130,8 +133,10 @@ void adicionarProduto() {
 
     for (int i = 0; i < estoque.size(); i++) {
         if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
-            cout << "Atualize a quantidade: ";
-            cin >> estoque[i].quantidade;
+            cout << "PRODUTO - " << estoque[i];
+            cout << "Adicione ao stock: ";
+            cin >> valorAdd;
+            estoque[i].quantidade += valorAdd;
             cout << "Artigo atualizado.";
             existe = true;
             break;
@@ -158,9 +163,9 @@ void adicionarProduto() {
 
 //Função para escolher os produtos e a quantidade.
 void venda() {
-    int qtdProdutoVenda=0, idProduto, qtdVenda, numCliente;
+    int qtdProdutoVenda = 0, idProduto, qtdVenda, numCliente;
     static int numFatura = 1;
-    float valorPago, IVA, precoTotal, precoUnit, troco, totalComIVA=0, ivaUnitario, precoSemIVA;
+    float valorPago, IVA, precoTotal, precoUnit, troco, totalComIVA = 0, ivaUnitario, precoSemIVA;
     //coloca o apontador do produto selecionado a nulo.
     Produto* produtoSelecionado = nullptr; // Já declarado fora do loop
 
@@ -169,8 +174,13 @@ void venda() {
     cout << "Inserir a quantidade de produtos desejados: ";
     cin >> qtdProdutoVenda;
     cout << endl;
+
     //iniciar Matriz
-    float mat[qtdProdutoVenda][5]; // Aumentei para guardar o preço unitário
+    float** mat = new float* [qtdProdutoVenda];
+    for (int i = 0; i < qtdProdutoVenda; ++i) {
+        mat[i] = new float[5]; // 5 colunas
+    } // Aumentei para guardar o preço unitário
+
 
     for (int i = 0; i < qtdProdutoVenda; i++) {
         cout << "Digite o id do produto: ";
@@ -193,13 +203,14 @@ void venda() {
             if (qtdVenda == 0) {
                 cout << "Item cancelado.\n";
                 continue; // Passa para o próximo produto
-            } else if (qtdVenda > produtoSelecionado->quantidade) {
+            }
+            else if (qtdVenda > produtoSelecionado->quantidade) {
                 cout << "Quantidade ainda insuficiente. Item cancelado.\n";
                 continue; // Passa para o próximo produto
             }
         }
         ivaUnitario = calcIVA(calcValorVenda(produtoSelecionado->precoCusto));
-        precoUnit = calcValorVenda(produtoSelecionado->precoCusto)+ivaUnitario;
+        precoUnit = calcValorVenda(produtoSelecionado->precoCusto) + ivaUnitario;
         precoTotal = precoUnit * qtdVenda;
         IVA = calcIVA(precoTotal);
         totalComIVA = precoTotal + IVA;
@@ -213,7 +224,7 @@ void venda() {
     }
     cout << "=========== Checkout ===========\n";
     for (int i = 0; i < qtdProdutoVenda; i++) {
-        float somaTotal;
+        float somaTotal = 0;
         int idProduto = mat[i][0];
         checarProdutoEstoque(idProduto, produtoSelecionado); // Usar a função para encontrar o produto
         if (produtoSelecionado) {
@@ -228,7 +239,7 @@ void venda() {
         cout << "Total c/IVA: " << fixed << setprecision(2) << somaTotal << " euros" << endl;
         cout << endl;
     }
-        
+
 
     //verifica se a venda sorteada é verdadeira e coloca o Total = 0
     bool vendaSorteada = vendaGratis();
@@ -252,7 +263,8 @@ void venda() {
         cout << "Inserir o valor pago: ";
         cin >> valorPago;
         cout << endl;
-    } else {
+    }
+    else {
         valorPago = 0;
     }
 
@@ -277,7 +289,7 @@ void venda() {
             cout << "Produto: " << produtoSelecionadoTalao->nome << endl;
             cout << "Quantidade: " << static_cast<int>(mat[i][1]) << endl;
             //diminui os produtos vendidos do estoque
-            produtoSelecionado -> quantidade -= static_cast<int>(mat[i][1]);
+            produtoSelecionado->quantidade -= static_cast<int>(mat[i][1]);
             cout << "Preco Unitario: " << fixed << setprecision(2) << mat[i][5] << " euros" << endl;
             cout << "Produto s/IVA: " << fixed << setprecision(2) << mat[i][2] << " euros" << endl;
             cout << "IVA (23%): " << fixed << setprecision(2) << mat[i][3] << " euros" << endl;
