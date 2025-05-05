@@ -247,6 +247,9 @@ void removerProduto() {
     _getch();
 }
 
+// Função para converter uma string para minúsculas
+
+
 void adicionarProduto() { // FUN��O COM PROBLEMA, CONSERTA(Primeiro caractere errado, espa�os d�o problema, e inser��o de char em int da problema)
     // A fun��o usa o item no index tamanho estoque, pois este vai sempre ser o ultimo item do array
     // Id atribuido � um a mais do que o tamanho do estoque, que seria o ultimo id por default
