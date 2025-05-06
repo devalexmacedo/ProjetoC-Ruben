@@ -48,8 +48,9 @@ vector<Produto> estoque = {
 
 //fun��o mostrar estoque
 void mostrarEstoque() {
+    int tamanho = estoque.size(); // Pra não dar erro no VS code
     cout << "------MENU PRINCIPAL------\n";
-    for (int i = 0; i < estoque.size(); i++) {
+    for (int i = 0; i < tamanho; i++) {
         if (estoque[i].quantidade != 0)
             cout << fixed << setprecision(2) << estoque[i];
     }
@@ -58,8 +59,9 @@ void mostrarEstoque() {
 //função para verificar se o produto escolhido tem no estoque.
 void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
     //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
+    int tamanho = estoque.size(); // Pra não dar erro no VS code
     produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para não haver lixo
-    for (int i = 0; i < estoque.size(); i++) {
+    for (int i = 0; i < tamanho; i++) {
         if (estoque[i].id == idProduto) {
             produtoSelecionado = &estoque[i];
             break;
@@ -429,7 +431,7 @@ void exibirMenu() {
         cout << "4. Exibir Stock" << endl;
         cout << "5. Sair" << endl;
         cout << "Escolha uma opcao: ";
-        opcao << validacaoInt();
+        opcao = validacaoInt();
 
         switch (opcao) {
         case 1:
