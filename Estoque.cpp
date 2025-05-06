@@ -7,6 +7,7 @@
 #include <conio.h> // Adicionado para usar o comando _getch, que interrompe limpezas de tela for de hora esperando um input do user
 #include <vector>
 #include <algorithm> // adicionador para verificar a igualdade entre strings: transform e tolower
+#include <limits> // Necessário para as funções de validações
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS, necessario para usar o localtime
 
@@ -304,8 +305,18 @@ void venda() {
 
     Produto* produtoSelecionado = nullptr;
     mostrarEstoque();
-    cout << "Inserir a quantidade de produtos desejados: ";
-    cin >> qtdProdutoVenda;
+    while (true) {
+        cout << "Inserir a quantidade de produtos a serem vendidos: ";
+        cin >> qtdProdutoVenda;
+
+        if (cin.good() && qtdProdutoVenda > 0) {
+            break; // Sai do loop se a entrada for válida
+        } else {
+            cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
 
     float** mat;
     inicializarMatriz(mat, qtdProdutoVenda);
@@ -331,8 +342,18 @@ void venda() {
     }
     else {
         cout << "Total a pagar: " << fixed << setprecision(2) << somaTotal << " euros\n";
-        cout << "Inserir o valor pago: ";
-        cin >> valorPago;
+        while (true) {
+            cout << "Inserir o valor pago: ";
+            cin >> qtdProdutoVenda;
+    
+            if (cin.good() && qtdProdutoVenda > somaTotal) {
+                break; // Sai do loop se a entrada for válida
+            } else {
+                cout << "Valor pago não pode ser menor que o total a pagar.\n";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        }
     }
 
     troco = valorPago - somaTotal;
