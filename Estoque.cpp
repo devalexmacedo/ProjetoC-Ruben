@@ -93,6 +93,7 @@ float calcIVA(float precoTotal) {
 void removerProduto() {
     mostrarEstoque();
     int idProduto;
+    char continuar;
 
     cout << "Insira o ID do produto: ";
     cin >> idProduto;
@@ -108,6 +109,15 @@ void removerProduto() {
         cout << "Este produto ja nao esta em estoque.";
     }
     else { // O produto existe e está em estoque
+        do { // Garante que o usuario escreveu o nome certo e quer prosseguir
+            system("cls");
+            cout << "Produto selecionado - ID: " << produtoSelecionado->id << " | Nome: " << produtoSelecionado->nome << " | Quantidade: " << produtoSelecionado->quantidade << " | Custo: " << produtoSelecionado->precoCusto << "\nDeseja remover do estoque? (Y/N): ";
+            cin >> continuar;
+        } while (continuar != 'y' && continuar != 'n' && continuar != 'Y' && continuar != 'N');
+
+        if (continuar == 'n' || continuar == 'N') // Se o usuario não quiser prosseguir, retorne a função anterior
+            return;
+
         produtoSelecionado->quantidade = 0;
         cout << "Produto removido.\n";
     }
@@ -126,10 +136,14 @@ void adicionarProduto() {
     string nome;
     int valorAdd;
     bool existe = false; // Flag inspeciona se o artigo j� existe
-    
+
+    mostrarEstoque();
+
     cout << "Insira o nome do novo artigo: ";
     cin.ignore();
     getline(cin, nome); // L� a linha inteira, permitindo espa�os nos nomes 
+
+    system("cls");
 
     for (int i = 0; i < estoque.size(); i++) {
         if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
@@ -143,11 +157,23 @@ void adicionarProduto() {
         }
     }
     if (existe == false) {
+        char continuar;
+
+        do { // Garante que o usuario escreveu o nome certo e quer prosseguir
+            cout << "Nome inserido: " << nome << ". Deseja continuar? (Y/N): ";
+            cin >> continuar;
+            system("cls");
+        } while (continuar != 'y' && continuar != 'n' && continuar != 'Y' && continuar != 'N');
+
+        if (continuar == 'n' || continuar == 'N') // Se o usuario não quiser prosseguir, retorne a função anterior
+            return;
+
         Produto p; // Novo produto que iremos adicionar ao array no final
 
         p.nome = nome; // O nome do produto � o nome que inserimos acima
         p.id = estoque.size() + 1; // Id atribuido � um a mais do que o tamanho do estoque, que seria o ultimo id por default
 
+        cout << "Nome: " << nome;
         cout << "Insira o custo: ";
         cin >> p.precoCusto;
         cout << "Insira a quantidade: ";
@@ -239,7 +265,7 @@ void checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
 //função para imprimir o talão
 void imprimirTalao(float** mat, int qtdProdutoVenda, int numFatura, int numCliente, float somaTotal, float somaIVA, float valorPago, float troco) {
     Produto* produtoSelecionado = nullptr; //transforma a posição de memória separada em null, para não ter lixo
-    time_t t = time(nullptr); 
+    time_t t = time(nullptr);
     tm* dataAtual = localtime(&t);
 
     cout << "\n======= TALÃO DE COMPRAS =======\n";
@@ -302,7 +328,8 @@ void venda() {
         somaTotal = 0;
         somaIVA = 0;
         cout << "Venda sorteada! Cliente não pagará.\n";
-    } else {
+    }
+    else {
         cout << "Total a pagar: " << fixed << setprecision(2) << somaTotal << " euros\n";
         cout << "Inserir o valor pago: ";
         cin >> valorPago;
@@ -350,7 +377,7 @@ void exibirMenu() {
         case 4:
             // chamar fun��o mostrar estoque
             mostrarEstoque();
-            // System pause � utilizao para fun��es que n�o pedem por input, pra impedir a tela de limpar fora de hora
+            cout << "Prima qualquer tecla...";
             _getch();
             break;
         case 5:
