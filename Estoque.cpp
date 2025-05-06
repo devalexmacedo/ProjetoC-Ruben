@@ -64,7 +64,7 @@ void mostrarEstoque() {
     }
 }
 
-//função para verificar se o produto escolhido tem no estoque
+//função para verificar se o produto escolhido tem no estoque.
 void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
     //percorre o estoque e se encontrar o produto no estoque, guarda o vetor no ponteiro.
     produtoSelecionado = nullptr; // Inicia o ponteiro a nullo, para não haver lixo
@@ -75,10 +75,35 @@ void checarProdutoEstoque(int idProduto, Produto*& produtoSelecionado) {
         }
     }
 }
+// Função auxiliar para limpar o buffer de entrada e tratar erros
+void limparBufferEntrada() {
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
 
-// Fun��o para gerar venda aleatoria gratis a cada 4 compras
+//função para tratar entrada inválida.
+void tratarErroEntrada() {
+    cout << "Entrada inválida. Por favor, tente novamente.\n";
+    cin.clear(); // Limpa os flags de erro
+    limparBufferEntrada(); // Descarta a entrada inválida
+}
+
+// Função para obter um float válido do usuário
+float obterFloat(const string& prompt) {
+    float valor;
+    while (true) {
+        cout << prompt;
+        if (cin >> valor) {
+            limparBufferEntrada();
+            return valor;
+        } else {
+            tratarErroEntrada();
+        }
+    }
+}
+
+// Fun��o para gerar venda aleatoria gratis          
 int vendaGratis() {
-    return rand() % 4 == 0;
+    return (rand() % 4) == 0;
 }
 
 // Fun��o para adicionar 30% ao valor de custo
@@ -174,9 +199,8 @@ void adicionarProduto() {
         p.nome = nome; // O nome do produto � o nome que inserimos acima
         p.id = estoque.size() + 1; // Id atribuido � um a mais do que o tamanho do estoque, que seria o ultimo id por default
 
-        cout << "Nome: " << nome;
-        cout << "Insira o custo: ";
-        cin >> p.precoCusto;
+        cout << "Nome: " << nome << endl;
+        p.precoCusto = obterFloat("Insira o custo: ");
         cout << "Insira a quantidade: ";
         cin >> p.quantidade;
 
@@ -343,10 +367,9 @@ void venda() {
     else {
         cout << "Total a pagar: " << fixed << setprecision(2) << somaTotal << " euros\n";
         while (true) {
-            cout << "Inserir o valor pago: ";
-            cin >> qtdProdutoVenda;
+            valorPago = obterFloat("Insira o valor pago pelo cliente: ");
     
-            if (cin.good() && qtdProdutoVenda > somaTotal) {
+            if (cin.good() && valorPago > somaTotal) {
                 break; // Sai do loop se a entrada for válida
             } else {
                 cout << "Valor pago não pode ser menor que o total a pagar.\n";
