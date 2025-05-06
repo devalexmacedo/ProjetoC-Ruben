@@ -23,7 +23,7 @@ struct Produto {
     float precoCusto;
 };
 
-//fun��o que diz ao cout como mostrar item por item.
+//funcaoo que diz ao cout como mostrar item da struct.
 ostream& operator<<(ostream& os, const Produto& p) {
     os << "ID: " << p.id << " | "
         << "Nome: " << p.nome << " | "
@@ -46,14 +46,28 @@ vector<Produto> estoque = {
     {10, "Suporte Monitor", 20, 8.00},
 };
 
-//fun��o mostrar estoque
+//funcao mostrar estoque
 void mostrarEstoque() {
-    int tamanho = estoque.size(); // Pra não dar erro no VS code
-    cout << "------MENU PRINCIPAL------\n";
-    for (int i = 0; i < tamanho; i++) {
-        if (estoque[i].quantidade != 0)
-            cout << fixed << setprecision(2) << estoque[i];
+    cout << "\n------------------------------ ESTOQUE ATUAL ------------------------------" << endl;
+    cout << left << setw(5) << "ID" << "| "
+         << left << setw(30) << "Nome do Produto" << "| "
+         << left << setw(6) << "Qtd." << "| "
+         << right << setw(18) << "Preco Custo (EUR)" << endl;
+    cout << "---------------------------------------------------------------------------" << endl;
+    bool estoqueVazioOuZerado = true;
+    for (const auto& produto : estoque) {
+        if (produto.quantidade > 0) {
+            cout << left << setw(5) << produto.id << "| "
+                 << left << setw(30) << produto.nome << "| "
+                 << left << setw(6) << produto.quantidade << "| "
+                 << right << setw(15) << fixed << setprecision(2) << produto.precoCusto << " EUR" << endl;
+            estoqueVazioOuZerado = false;
+        }
     }
+    if (estoqueVazioOuZerado) {
+        cout << "O estoque está vazio ou todos os produtos têm quantidade 0." << endl;
+    }
+    cout << "---------------------------------------------------------------------------" << endl;
 }
 
 //função para verificar se o produto escolhido tem no estoque.
