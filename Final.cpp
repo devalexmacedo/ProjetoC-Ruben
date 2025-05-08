@@ -48,19 +48,19 @@ vector<Produto> estoque = {
 
 //funcao mostrar estoque
 void mostrarEstoque() {
-    cout << "\n------------------------------ ESTOQUE ATUAL ------------------------------" << endl;
+    cout << "------------------------------ ESTOQUE ATUAL ------------------------------" << endl;
     cout << left << setw(5) << "ID" << "| "
-         << left << setw(30) << "Nome do Produto" << "| "
-         << left << setw(6) << "Qtd." << "| "
-         << right << setw(18) << "Preco Custo (EUR)" << endl;
+        << left << setw(30) << "Nome do Produto" << "| "
+        << left << setw(6) << "Qtd." << "| "
+        << right << setw(18) << "Preco Custo (EUR)" << endl;
     cout << "---------------------------------------------------------------------------" << endl;
     bool estoqueVazioOuZerado = true;
     for (const auto& produto : estoque) {
         if (produto.quantidade > 0) {
             cout << left << setw(5) << produto.id << "| "
-                 << left << setw(30) << produto.nome << "| "
-                 << left << setw(6) << produto.quantidade << "| "
-                 << right << setw(15) << fixed << setprecision(2) << produto.precoCusto << " EUR" << endl;
+                << left << setw(30) << produto.nome << "| "
+                << left << setw(6) << produto.quantidade << "| "
+                << right << setw(15) << fixed << setprecision(2) << produto.precoCusto << " EUR" << endl;
             estoqueVazioOuZerado = false;
         }
     }
@@ -230,7 +230,6 @@ void adicionarProduto() {
         p.id = estoque.size() + 1; // Id atribuido � um a mais do que o tamanho do estoque, que seria o ultimo id por default
 
         cout << "Nome do Produto: " << nome << endl;
-        cout << "Insira o custo: ";
         p.precoCusto = obterFloat("Insira o custo: ");
         cout << "Insira a quantidade: ";
         p.quantidade = validacaoInt();
@@ -394,6 +393,7 @@ void venda() {
 
     if (produtosProcessados == 0) {
         cout << "Nenhum produto válido foi processado. Venda cancelada.\n";
+        getch();
         return;
     }
 
