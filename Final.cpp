@@ -110,16 +110,17 @@ float obterFloat(const string& prompt) {
     }
 }
 
-int validacaoInt() { // Usado em cin's para validar ints e retornar os valores se forem validos. Se não forem repete até serem.
+int validacaoInt(const string& prompt) { // Usado em cin's para validar ints e retornar os valores se forem validos. Se não forem repete até serem.
     int n;
-    bool firstRun = true;
 
-    while (!(cin >> n)) {
-        cin.clear(); // Limpa o buffer
-        cin.ignore(10000, '\n');
-        if (firstRun == true) {
-            firstRun = false;
-            cout << "Valor invalido. Insira um numero: ";
+    while (true) {
+        cout << prompt;
+        if (cin >> n) {
+            limparBufferEntrada();
+            return n;
+        }
+        else {
+            tratarErroEntrada();
         }
     }
 
@@ -148,8 +149,7 @@ void removerProduto() {
     system("cls");
     mostrarEstoque();
 
-    cout << "Insira o ID do produto: ";
-    idProduto = validacaoInt();
+    idProduto = validacaoInt("Insira o ID do produto: ");
 
     Produto* produtoSelecionado = nullptr; // Inicialmente não sabemos se o ID/Produto que o utilizador vai inserir existe, ent�o inicializamos um ponteiro nulo que é atualizado
     checarProdutoEstoque(idProduto, produtoSelecionado);
@@ -194,7 +194,7 @@ void adicionarProduto() {
     mostrarEstoque();
 
     cout << "Insira o nome do novo artigo: ";
-    cin.ignore();
+    // cin.ignore();
     getline(cin, nome); // L� a linha inteira, permitindo espa�os nos nomes 
 
     system("cls");
@@ -204,8 +204,7 @@ void adicionarProduto() {
     for (int i = 0; i < tamanho; i++) {
         if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
             cout << "PRODUTO - " << estoque[i];
-            cout << "Adicione ao stock: ";
-            valorAdd = validacaoInt();
+            valorAdd = validacaoInt("Adicione ao stock: "); // O user pode adicionar 0 ao estoque para não o forçar a adicionar caso tenha feito um erro
             estoque[i].quantidade += valorAdd;
             cout << "Artigo atualizado.";
             existe = true;
@@ -231,8 +230,11 @@ void adicionarProduto() {
 
         cout << "Nome do Produto: " << nome << endl;
         p.precoCusto = obterFloat("Insira o custo: ");
-        cout << "Insira a quantidade: ";
-        p.quantidade = validacaoInt();
+        while (p.precoCusto <= 0) // Enquanto o user tentar dar valor 0 ou negativo, fica pedindo por novo valor
+            p.precoCusto = obterFloat("Custo invalido. Insira um valor maior que 0: ");
+        p.quantidade = validacaoInt("Insira a quantidade: ");
+        while (p.quantidade <= 0) // Enquanto o user tentar dar valor 0 ou negativo, fica pedindo por novo valor
+            p.quantidade = validacaoInt("Quantidade invalida. Insira um valor maior que 0: ");
 
         // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adi��es sejam possiveis
         estoque.push_back(p);
@@ -253,22 +255,32 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado) {
     int idProduto, qtdVenda;
     float precoSemIVA, ivaUnitario, precoUnit, precoTotal, IVA, totalComIVA;
 
-    cout << "Digite o id do " << i + 1 << "º produto: ";
-    idProduto = validacaoInt();
+
+    idProduto = validacaoInt("Digite o id do " + to_string(i + 1) + "º produto: ");
     checarProdutoEstoque(idProduto, produtoSelecionado);
     if (!produtoSelecionado) {
         cout << "Produto nao encontrado.\n";
         return false;
     }
 
-    cout << "Digite a quantidade de " << produtoSelecionado->nome << " que deseja: ";
-    qtdVenda = validacaoInt();
+    qtdVenda = validacaoInt("Digite a quantidade de " + produtoSelecionado->nome + " que deseja: ");
 
     if (qtdVenda > produtoSelecionado->quantidade) {
         cout << "Quantidade insuficiente (" << produtoSelecionado->quantidade << " em estoque).\n";
-        cout << "Digite nova quantidade (ou 0 para cancelar): ";
-        qtdVenda = validacaoInt();
-        if (qtdVenda == 0 || qtdVenda > produtoSelecionado->quantidade) {
+        qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
+        if (qtdVenda == 0) {
+            cout << "Item cancelado.\n";
+            return false;
+        }
+        else if (qtdVenda > produtoSelecionado->quantidade) {
+            cout << "Quantidade insuficiente (" << produtoSelecionado->quantidade << " em estoque).\nItem cancelado";
+            return false;
+        }
+    }
+    else if (qtdVenda >= 0) {
+        cout << "Quantidade invalida.\n";
+        qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
+        if (qtdVenda == 0) {
             cout << "Item cancelado.\n";
             return false;
         }
@@ -369,14 +381,13 @@ void venda() {
     mostrarEstoque();
 
     while (true) {
-        cout << "Inserir a quantidade de produtos a serem vendidos: ";
-        qtdProdutoVenda = validacaoInt();
+        qtdProdutoVenda = validacaoInt("Inserir a quantidade de produtos a serem vendidos: ");
 
         if (cin.good() && qtdProdutoVenda > 0) {
             break; // Sai do loop se a entrada for válida
         }
         else {
-            cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\n";
+            cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\nPrima ENTER.";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
@@ -423,8 +434,7 @@ void venda() {
 
     troco = valorPago - somaTotal;
 
-    cout << "Digite o codigo do cliente: ";
-    numCliente = validacaoInt();
+    numCliente = validacaoInt("Digite o codigo do cliente: ");
 
     imprimirTalao(mat, qtdProdutoVenda, numFatura++, numCliente, somaTotal, somaIVA, valorPago, troco);
 
@@ -444,8 +454,7 @@ void exibirMenu() {
         cout << "3. Excluir Produto" << endl;
         cout << "4. Exibir Stock" << endl;
         cout << "5. Sair" << endl;
-        cout << "Escolha uma opcao: ";
-        opcao = validacaoInt();
+        opcao = validacaoInt("Escolha uma opcao: ");
 
         switch (opcao) {
         case 1:
