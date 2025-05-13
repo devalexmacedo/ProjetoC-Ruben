@@ -444,47 +444,65 @@ void venda() {
 //função menu
 void exibirMenu() {
     int opcao;
-    //menu com as intera��es do programa
+    vector<pair<int, string>> menuOpcoes = {
+        {1, "Efetuar Venda"},
+        {2, "Criar Novo Artigo / Atualizar Artigo"},
+        {3, "Excluir Produto"},
+        {4, "Exibir Stock"},
+        {5, "Sair"}
+    };
+
+    // Definir as larguras das colunas
+    const int larguraID = 7;
+    const int larguraOpcao = 40;
+
+    // Calcular a largura total da linha
+    const int larguraTotal = larguraID + 2 + larguraOpcao + 2; // ID + " | " + Opção + " |"
+
+    string linhaSeparadora(larguraTotal, '-');
+
     do {
-        system("cls"); // Limpa a tela toda a vez que uma op��o � selecionada
+        system("cls");
 
-        cout << "------MENU PRINCIPAL------" << endl;
-        cout << "1. Efetuar Venda" << endl;
-        cout << "2. Criar Novo Artigo/Atualizar Artigo" << endl;
-        cout << "3. Excluir Produto" << endl;
-        cout << "4. Exibir Stock" << endl;
-        cout << "5. Sair" << endl;
-        opcao = validacaoInt("Escolha uma opcao: ");
+        cout << "------------------ MENU PRINCIPAL -----------------" << endl;
+        cout << left << setw(larguraID) << "Opção" << " | " << left << setw(larguraOpcao) << "Descrição" << endl;
+        cout << linhaSeparadora << endl;
 
-        switch (opcao) {
-        case 1:
-            // chamar fun��o de venda aqui
-            venda();
-            break;
-        case 2:
-            // chamar fun��o de cria��o
-            adicionarProduto();
-            break;
-        case 3:
-            // chamar fun��o de elimina��o
-            removerProduto();
-            break;
-        case 4:
-            // chamar fun��o mostrar estoque
-            mostrarEstoque();
-            cout << "Prima qualquer tecla...";
-            _getch();
-            break;
-        case 5:
-            cout << "Pressione qualquer tecla..." << endl;
-            _getch();
-            break;
-        default:
-            cout << "Opcao invalida! Tente novamente." << endl;
-            _getch();
+        for (const auto& item : menuOpcoes) {
+            cout << left << setw(larguraID) << item.first << " | " << left << setw(larguraOpcao) << item.second << endl;
         }
 
-        cout << endl;
+        cout << linhaSeparadora << endl;
+        opcao = validacaoInt("Escolha uma opcao: ");
+        switch (opcao) {
+            case 1:
+                // chamar fun��o de venda aqui
+                venda();
+                break;
+            case 2:
+                // chamar fun��o de cria��o
+                adicionarProduto();
+                break;
+            case 3:
+                // chamar fun��o de elimina��o
+                removerProduto();
+                break;
+            case 4:
+                // chamar fun��o mostrar estoque
+                mostrarEstoque();
+                cout << "Prima qualquer tecla...";
+                _getch();
+                break;
+            case 5:
+                cout << "Pressione qualquer tecla..." << endl;
+                _getch();
+                break;
+            default:
+                cout << "Opcao invalida! Tente novamente." << endl;
+                _getch();
+            }
+
+            cout << endl;
 
     } while (opcao != 5);
 }
