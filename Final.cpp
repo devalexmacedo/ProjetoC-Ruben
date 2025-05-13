@@ -348,8 +348,8 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
     cout << "Total c/IVA: " << fixed << setprecision(2) << somaTotal << " euros\n\n";
 
     while (true) {
-        cout << "Confirmar compra (1 - Sim) ou Desistir da venda (0 - Não)? ";
-        confirmacao = validacaoInt();
+        
+        confirmacao = validacaoInt("Confirmar compra (1 - Sim) ou Desistir da venda (0 - Não)? ");
 
         if (confirmacao == 1) {
             cout << "Compra confirmada.\n";
