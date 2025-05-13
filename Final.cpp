@@ -191,14 +191,14 @@ void adicionarProduto() {
 
     string nome;
     int valorAdd;
-    bool existe = false; // Flag inspeciona se o artigo j� existe
+    bool existe = false; // Flag inspeciona se o artigo ja existe
 
     system("cls");
     mostrarEstoque();
 
     cout << "Insira o nome do novo artigo: ";
     // cin.ignore();
-    getline(cin, nome); // L� a linha inteira, permitindo espa�os nos nomes 
+    getline(cin, nome); // Le a linha inteira, permitindo espacos nos nomes 
 
     system("cls");
 
@@ -250,8 +250,8 @@ void adicionarProduto() {
 
         Produto p; // Novo produto que iremos adicionar ao array no final
 
-        p.nome = nome; // O nome do produto � o nome que inserimos acima
-        p.id = estoque.size() + 1; // Id atribuido � um a mais do que o tamanho do estoque, que seria o ultimo id por default
+        p.nome = nome; // O nome do produto e o nome que inserimos acima
+        p.id = estoque.size() + 1; // Id atribuido e um a mais do que o tamanho do estoque, que seria o ultimo id por default
 
         cout << "Nome do Produto: " << nome << endl;
         p.precoCusto = obterFloat("Insira o custo: ");
@@ -261,7 +261,7 @@ void adicionarProduto() {
         while (p.quantidade <= 0) // Enquanto o user tentar dar valor 0 ou negativo, fica pedindo por novo valor
             p.quantidade = validacaoInt("Quantidade invalida. Insira um valor maior que 0: ");
 
-        // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adi��es sejam possiveis
+        // Adiciona ao vetor e aumenta o tamanho do estoque para que mais adicoes sejam possiveis
         estoque.push_back(p);
 
         cout << "Artigo adicionado.";
@@ -305,7 +305,6 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int
             continue; // Volta ao início do loop para inserir um novo ID
         }
 
-        // ***** NOVA VERIFICAÇÃO DE ESTOQUE *****
         if (produtoSelecionado->quantidade == 0) {
             cout << "Produto '" << produtoSelecionado->nome << "' (ID: " << idProduto << ") está fora de estoque. Escolha outro produto.\n";
             
@@ -362,7 +361,7 @@ bool checkout(float** mat, int numItensProcessados, float& somaTotal, float& som
     system("cls");
 
     cout << "=========== Checkout ===========\n";
-    for (int i = 0; i < numItensProcessados; ++i) { // << LOOP USA O PARÂMETRO CORRIGIDO
+    for (int i = 0; i < numItensProcessados; ++i) {
         int idProduto = static_cast<int>(mat[i][0]);
         int quantidadeVendida = static_cast<int>(mat[i][1]);
         checarProdutoEstoque(idProduto, produtoSelecionado);
@@ -585,19 +584,19 @@ void exibirMenu() {
         opcao = validacaoInt("Escolha uma opcao: ");
         switch (opcao) {
         case 1:
-            // chamar fun��o de venda aqui
+            // chamar funcao de venda aqui
             venda();
             break;
         case 2:
-            // chamar fun��o de cria��o
+            // chamar funcao de criacao
             adicionarProduto();
             break;
         case 3:
-            // chamar fun��o de elimina��o
+            // chamar funcao de eliminacao
             removerProduto();
             break;
         case 4:
-            // chamar fun��o mostrar estoque
+            // chamar funcao mostrar estoque
             mostrarEstoque();
             cout << "Prima qualquer tecla...";
             _getch();
