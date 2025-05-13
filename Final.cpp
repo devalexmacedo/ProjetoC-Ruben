@@ -313,34 +313,65 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado) {
     return true;
 }
 
-//função checkout
-void checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA) {
-    Produto* produtoSelecionado = nullptr; //transforma a posição de memória separada em null, para não ter lixo
+// função checkout
+bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA) {
+    Produto* produtoSelecionado = nullptr;
     somaTotal = somaIVA = 0;
+    std::vector<std::pair<int, int>> carrinhoOriginal; // Para reverter o estoque em caso de desistência
+    int confirmacao;
 
     system("cls");
 
     cout << "=========== Checkout ===========\n";
     for (int i = 0; i < qtdProdutoVenda; ++i) {
         int idProduto = mat[i][0];
+        int quantidadeVendida = static_cast<int>(mat[i][1]);
         checarProdutoEstoque(idProduto, produtoSelecionado);
         if (produtoSelecionado) {
             cout << "Produto: " << produtoSelecionado->nome << "\n";
-            cout << "Quantidade: " << static_cast<int>(mat[i][1]) << "\n";
+            cout << "Quantidade: " << quantidadeVendida << "\n";
             cout << "Preço Unitário: " << fixed << setprecision(2) << mat[i][5] << " euros\n";
             cout << "Preço s/IVA: " << fixed << setprecision(2) << mat[i][2] << " euros\n";
-            cout << "IVA (23%): " << fixed << setprecision(2) << mat[i][3] / mat[i][1] << " euros\n";
-            produtoSelecionado->quantidade -= static_cast<int>(mat[i][1]);
+            cout << "IVA (23%): " << fixed << setprecision(2) << mat[i][3] / quantidadeVendida << " euros\n";
+            cout << "---------------------------------\n";
+
+            carrinhoOriginal.push_back({idProduto, quantidadeVendida});
+            produtoSelecionado->quantidade -= quantidadeVendida; // Atualiza o estoque (temporariamente)
 
             somaTotal += mat[i][4];
             somaIVA += mat[i][3];
-            cout << "---------------------------------\n";
         }
     }
 
     cout << "Subtotal s/IVA: " << fixed << setprecision(2) << somaTotal - somaIVA << " euros\n";
     cout << "Total IVA: " << fixed << setprecision(2) << somaIVA << " euros\n";
     cout << "Total c/IVA: " << fixed << setprecision(2) << somaTotal << " euros\n\n";
+
+    while (true) {
+        cout << "Confirmar compra (1 - Sim) ou Desistir da venda (0 - Não)? ";
+        confirmacao = validacaoInt();
+
+        if (confirmacao == 1) {
+            cout << "Compra confirmada.\n";
+            return true; // Retorna true se a compra for confirmada
+        } else if (confirmacao == 0) {
+            cout << "Venda cancelada no checkout. Revertendo estoque.\n";
+            // Reverter as alterações no estoque
+            for (const auto& item : carrinhoOriginal) {
+                checarProdutoEstoque(item.first, produtoSelecionado);
+                if (produtoSelecionado) {
+                    produtoSelecionado->quantidade += item.second;
+                }
+            }
+            somaTotal = 0; // Zera o total para indicar que a venda foi cancelada
+            somaIVA = 0;
+            return false; // Retorna false se a venda for cancelada
+        } else {
+            cout << "Opção inválida. Digite 1 para Sim ou 0 para Não.\n";
+        }
+    }
+    // Esta linha nunca será alcançada devido ao loop while(true), mas é boa prática ter um retorno padrão (embora neste caso, os retornos dentro do loop cobrem todas as possibilidades).
+    return false;
 }
 
 //função para imprimir o talão
@@ -386,6 +417,7 @@ void venda() {
     static int numFatura = 1;
 
     Produto* produtoSelecionado = nullptr;
+    float** mat = nullptr; // Inicializar mat para evitar problemas com delete[]
 
     system("cls");
     mostrarEstoque();
@@ -400,10 +432,10 @@ void venda() {
             cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\nPrima ENTER.";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            _getch(); // Usar _getch() para pausar
         }
     }
 
-    float** mat;
     inicializarMatriz(mat, qtdProdutoVenda);
 
     int produtosProcessados = 0;
@@ -414,40 +446,59 @@ void venda() {
 
     if (produtosProcessados == 0) {
         cout << "Nenhum produto válido foi processado. Venda cancelada.\n";
-        getch();
+        _getch();
+        // Liberar a memória alocada para mat, mesmo que a venda seja cancelada
+        for (int i = 0; i < qtdProdutoVenda; ++i) {
+            delete[] mat[i];
+        }
+        delete[] mat;
         return;
     }
 
-    checkout(mat, qtdProdutoVenda, somaTotal, somaIVA);
+    // Chama a função checkout e verifica o resultado
+    if (checkout(mat, qtdProdutoVenda, somaTotal, somaIVA)) {
+        bool vendaSorteada = vendaGratis();
+        if (vendaSorteada) {
+            somaTotal = 0;
+            somaIVA = 0;
+            cout << "Venda sorteada! Cliente não pagará.\n";
+        }
+        else {
+            cout << "Total a pagar: " << fixed << setprecision(2) << somaTotal << " euros\n";
+            while (true) {
+                valorPago = obterFloat("Insira o valor pago pelo cliente: ");
 
-    bool vendaSorteada = vendaGratis();
-    if (vendaSorteada) {
-        somaTotal = 0;
-        somaIVA = 0;
-        cout << "Venda sorteada! Cliente não pagará.\n";
-    }
-    else {
-        cout << "Total a pagar: " << fixed << setprecision(2) << somaTotal << " euros\n";
-        while (true) {
-            valorPago = obterFloat("Insira o valor pago pelo cliente: ");
-
-            if (valorPago >= somaTotal) {
-                break; // Sai do loop se a entrada for válida
-            }
-            else {
-                do {
-                    valorPago = obterFloat("Valor pago não pode ser menor que o total a pagar\nInsira o valor pago pelo cliente: ");
-                } while (valorPago < somaTotal);
-                break;
+                if (valorPago >= somaTotal) {
+                    break; // Sai do loop se a entrada for válida
+                }
+                else {
+                    do {
+                        valorPago = obterFloat("Valor pago não pode ser menor que o total a pagar\nInsira o valor pago pelo cliente: ");
+                    } while (valorPago < somaTotal);
+                    break;
+                }
             }
         }
+
+        troco = valorPago - somaTotal;
+
+        numCliente = validacaoInt("Digite o codigo do cliente: ");
+
+        imprimirTalao(mat, qtdProdutoVenda, numFatura++, numCliente, somaTotal, somaIVA, valorPago, troco);
+    } else {
+        cout << "\nVenda cancelada durante o checkout.\n";
+        // Não precisamos fazer mais nada aqui, pois o checkout já cuidou da reversão do estoque
+        somaTotal = 0;
+        somaIVA = 0;
     }
 
-    troco = valorPago - somaTotal;
-
-    numCliente = validacaoInt("Digite o codigo do cliente: ");
-
-    imprimirTalao(mat, qtdProdutoVenda, numFatura++, numCliente, somaTotal, somaIVA, valorPago, troco);
+    // Liberar a memória alocada para mat
+    if (mat != nullptr) {
+        for (int i = 0; i < qtdProdutoVenda; ++i) {
+            delete[] mat[i];
+        }
+        delete[] mat;
+    }
 
     _getch();
 }
