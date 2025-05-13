@@ -270,7 +270,6 @@ void inicializarMatriz(float**& mat, int qtdProdutoVenda) {
     }
 }
 
-//função para registrar venda
 bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int>& produtosVendidos) {
     int idProduto, qtdVenda;
     float precoSemIVA, ivaUnitario, precoUnit, precoTotal, IVA, totalComIVA;
@@ -294,10 +293,18 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int
 
         checarProdutoEstoque(idProduto, produtoSelecionado);
         if (!produtoSelecionado) {
-            cout << "Produto nao encontrado. Tente novamente.\n"; // Mensagem para tentar novamente
+            cout << "Produto nao encontrado. Tente novamente.\n";
             continue; // Volta ao início do loop para inserir um novo ID
         }
-        produtoValido = true; // Produto encontrado e não repetido, podemos prosseguir
+
+        // ***** NOVA VERIFICAÇÃO DE ESTOQUE *****
+        if (produtoSelecionado->quantidade == 0) {
+            cout << "Produto '" << produtoSelecionado->nome << "' (ID: " << idProduto << ") está fora de estoque. Escolha outro produto.\n";
+            
+            continue; 
+        }
+        
+        produtoValido = true; // Produto encontrado, não repetido E COM ESTOQUE, podemos prosseguir
     }
 
     while (true) {
