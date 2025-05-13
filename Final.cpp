@@ -261,6 +261,7 @@ void adicionarProduto() {
     }
     _getch();
 }
+
 //Função para iniciar a matriz
 void inicializarMatriz(float**& mat, int qtdProdutoVenda) {
     mat = new float* [qtdProdutoVenda];
@@ -462,7 +463,6 @@ void venda() {
             cout << "Quantidade invalida. Por favor, insira um número maior que zero.\nPressione Enter para continuar...";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            _getch();
         }
     }
 
@@ -513,10 +513,9 @@ void venda() {
 
         troco = valorPago - somaTotal;
 
-        int numCliente;
         while (true) {
             numCliente = validacaoInt("Digite o codigo do cliente: ");
-            if (numCliente > 0) {
+            if (numCliente != 0) {
                 break; // Sai do loop se o código do cliente for diferente de zero
             } else {
                 cout << "O código do cliente não pode ser zero. Digite um valor válido.\n";
@@ -524,20 +523,15 @@ void venda() {
         }
 
         imprimirTalao(mat, qtdProdutoVenda, numFatura++, numCliente, somaTotal, somaIVA, valorPago, troco);
-        } else {
-            cout << "\nVenda cancelada durante o checkout.\n";
-            // Não precisamos fazer mais nada aqui, pois o checkout já cuidou da reversão do estoque
-            somaTotal = 0;
-            somaIVA = 0;
-        }
+    }
 
-        // Liberar a memória alocada para mat
-        if (mat != nullptr) {
-            for (int i = 0; i < qtdProdutoVenda; ++i) {
-                delete[] mat[i];
-            }
-            delete[] mat;
+    // Liberar a memória alocada para mat
+    if (mat != nullptr) {
+        for (int i = 0; i < qtdProdutoVenda; ++i) {
+            delete[] mat[i];
         }
+        delete[] mat;
+    }
 
     _getch();
 }
