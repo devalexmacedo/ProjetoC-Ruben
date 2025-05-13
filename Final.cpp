@@ -100,7 +100,7 @@ float obterFloat(const string& prompt) {
     float valor;
     while (true) {
         cout << prompt;
-        if (cin >> valor) {
+        if (cin >> valor && valor > 0) {
             limparBufferEntrada();
             return valor;
         }
@@ -115,7 +115,7 @@ int validacaoInt(const string& prompt) { // Usado em cin's para validar ints e r
 
     while (true) {
         cout << prompt;
-        if (cin >> n) {
+        if (cin >> n && n > 0) {
             limparBufferEntrada();
             return n;
         }
