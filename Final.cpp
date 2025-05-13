@@ -555,7 +555,7 @@ void exibirMenu() {
     int opcao;
     vector<pair<int, string>> menuOpcoes = {
         {1, "Efetuar Venda"},
-        {2, "Criar Novo Artigo / Atualizar Artigo"},
+        {2, "Criar Novo / Atualizar Artigo"},
         {3, "Excluir Produto"},
         {4, "Exibir Stock"},
         {5, "Sair"}
