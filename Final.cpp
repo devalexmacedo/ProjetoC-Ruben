@@ -34,7 +34,7 @@ ostream& operator<<(ostream& os, const Produto& p) {
 
 //Insere produtos no estoque.
 vector<Produto> estoque = {
-    {1, "Placa", 20, 85.00},
+    {1, "Placa Mãe Asus B550", 20, 85.00},
     {2, "Processador Ryzen 5 5600X", 20, 140.00},
     {3, "Memoria RAM 16GB DDR4", 20, 35.00},
     {4, "Disco SSD 1TB NVMe", 20, 55.00},
@@ -96,7 +96,7 @@ void tratarErroEntrada() {
 }
 
 // Função para obter um float válido do usuário
-float obterFloat(const string& prompt) {
+float obterFloat(const string& prompt) {// Usado em cin's para validar ints e retornar os valores se forem validos. Se não forem repete até serem.
     float valor;
     while (true) {
         cout << prompt;
@@ -127,7 +127,7 @@ int validacaoInt(const string& prompt) { // Usado em cin's para validar ints e r
     return n;
 }
 
-// Fun��o para gerar venda aleatoria gratis          
+// Fun��o para gerar venda aleatoria gratis com 25% de chance         
 int vendaGratis() {
     return (rand() % 4) == 0;
 }
@@ -205,12 +205,19 @@ void adicionarProduto() {
     int tamanho = estoque.size(); // Pra não dar erro no VS code
 
     for (int i = 0; i < tamanho; i++) {
-        if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
+        if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e comea a alterar o produto existente
             string input; // Necessario para receber a linha
             char opt; // Necessario para receber a opção sem encher o buffer
 
             cout << "PRODUTO - " << estoque[i];
-            valorAdd = validacaoInt("Adicione ao stock: "); // O user pode adicionar 0 ao estoque para não o forçar a adicionar caso tenha feito um erro
+            while (true) {
+                valorAdd = validacaoInt("Adicione ao stock (valor >= 0): "); // Altera a mensagem para o usuário
+                if (valorAdd >= 0) {
+                    break;
+                } else {
+                    cout << "Quantidade inválida. Por favor, insira um valor maior ou igual a zero.\n";
+                }
+            }
             estoque[i].quantidade += valorAdd;
             do { // Pergunta se o user quer atualizar o preço
                 cout << "Deseja atualizar o preço?(Y/N) ";
@@ -270,6 +277,7 @@ void inicializarMatriz(float**& mat, int qtdProdutoVenda) {
     }
 }
 
+//função para registrar a venda
 bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int>& produtosVendidos) {
     int idProduto, qtdVenda;
     float precoSemIVA, ivaUnitario, precoUnit, precoTotal, IVA, totalComIVA;
