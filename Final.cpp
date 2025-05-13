@@ -336,18 +336,18 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int
 }
 
 // função checkout
-bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA) {
+bool checkout(float** mat, int numItensProcessados, float& somaTotal, float& somaIVA) { 
     Produto* produtoSelecionado = nullptr;
     somaTotal = 0;
     somaIVA = 0;
-    vector<pair<int, int>> carrinhoOriginal; // Para reverter o estoque em caso de desistência
+    vector<pair<int, int>> carrinhoOriginal;
     string input;
     char confirmacao;
 
     system("cls");
 
     cout << "=========== Checkout ===========\n";
-    for (int i = 0; i < qtdProdutoVenda; ++i) {
+    for (int i = 0; i < numItensProcessados; ++i) { // << LOOP USA O PARÂMETRO CORRIGIDO
         int idProduto = static_cast<int>(mat[i][0]);
         int quantidadeVendida = static_cast<int>(mat[i][1]);
         checarProdutoEstoque(idProduto, produtoSelecionado);
@@ -400,7 +400,6 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
             return false; // Retorna false se a venda for cancelada
         }
     }
-    // Esta linha nunca será alcançada devido ao loop while(true), mas é boa prática ter um retorno padrão (embora neste caso, os retornos dentro do loop cobrem todas as possibilidades).
     return false;
 }
 
