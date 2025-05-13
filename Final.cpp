@@ -144,7 +144,8 @@ float calcIVA(float precoTotal) {
 
 void removerProduto() {
     int idProduto;
-    char continuar;
+    string input; // Necessario para receber a linha
+    char continuar; // Necessario para receber a opção e não encher o buffer
 
     system("cls");
     mostrarEstoque();
@@ -165,11 +166,13 @@ void removerProduto() {
         do { // Garante que o usuario escreveu o nome certo e quer prosseguir
             system("cls");
             cout << "Produto selecionado - ID: " << produtoSelecionado->id << " | Nome: " << produtoSelecionado->nome << " | Quantidade: " << produtoSelecionado->quantidade << " | Custo: " << produtoSelecionado->precoCusto << "\nDeseja remover do estoque? (Y/N): ";
-            cin >> continuar;
+            getline(cin, input);
+            continuar = input[0];
         } while (continuar != 'y' && continuar != 'n' && continuar != 'Y' && continuar != 'N');
 
-        if (continuar == 'n' || continuar == 'N') // Se o usuario não quiser prosseguir, retorne a função anterior
+        if (continuar == 'n' || continuar == 'N') { // Se o usuario não quiser prosseguir, retorne a função anterior
             return;
+        }
 
         produtoSelecionado->quantidade = 0;
         cout << "Produto removido.\n";
@@ -203,13 +206,16 @@ void adicionarProduto() {
 
     for (int i = 0; i < tamanho; i++) {
         if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
-            char opt;
+            string input; // Necessario para receber a linha
+            char opt; // Necessario para receber a opção sem encher o buffer
+
             cout << "PRODUTO - " << estoque[i];
             valorAdd = validacaoInt("Adicione ao stock: "); // O user pode adicionar 0 ao estoque para não o forçar a adicionar caso tenha feito um erro
             estoque[i].quantidade += valorAdd;
             do { // Pergunta se o user quer atualizar o preço
                 cout << "Deseja atualizar o preço?(Y/N) ";
-                cin >> opt;
+                getline(cin, input);
+                opt = input[0];
             } while (opt != 'y' && opt != 'n' && opt != 'Y' && opt != 'N');
 
             if (opt == 'y' || opt == 'Y') {
@@ -222,11 +228,13 @@ void adicionarProduto() {
         }
     }
     if (existe == false) {
-        char continuar;
+        string input; // Necessario para receber a linha
+        char continuar; // Necessario para receber a opção e não encher o buffer
 
         do { // Garante que o usuario escreveu o nome certo e quer prosseguir
             cout << "Nome inserido: " << nome << ". Deseja continuar? (Y/N): ";
-            cin >> continuar;
+            getline(cin, input);
+            continuar = input[0];
             system("cls");
         } while (continuar != 'y' && continuar != 'n' && continuar != 'Y' && continuar != 'N');
 
@@ -318,7 +326,8 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
     Produto* produtoSelecionado = nullptr;
     somaTotal = somaIVA = 0;
     std::vector<std::pair<int, int>> carrinhoOriginal; // Para reverter o estoque em caso de desistência
-    int confirmacao;
+    string input;
+    char confirmacao;
 
     system("cls");
 
@@ -335,7 +344,7 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
             cout << "IVA (23%): " << fixed << setprecision(2) << mat[i][3] / quantidadeVendida << " euros\n";
             cout << "---------------------------------\n";
 
-            carrinhoOriginal.push_back({idProduto, quantidadeVendida});
+            carrinhoOriginal.push_back({ idProduto, quantidadeVendida });
             produtoSelecionado->quantidade -= quantidadeVendida; // Atualiza o estoque (temporariamente)
 
             somaTotal += mat[i][4];
@@ -348,13 +357,17 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
     cout << "Total c/IVA: " << fixed << setprecision(2) << somaTotal << " euros\n\n";
 
     while (true) {
-        
-        confirmacao = validacaoInt("Confirmar compra (1 - Sim) ou Desistir da venda (0 - Não)? ");
+        do {
+            cout << "Confirmar compra (Y - Sim) ou Desistir da venda (N - Não)? ";
+            getline(cin, input);
+            confirmacao = input[0];
+        } while (confirmacao != 'y' && confirmacao != 'n' && confirmacao != 'Y' && confirmacao != 'N');
 
-        if (confirmacao == 1) {
+        if (confirmacao == 'y' || confirmacao == 'Y') {
             cout << "Compra confirmada.\n";
             return true; // Retorna true se a compra for confirmada
-        } else if (confirmacao == 0) {
+        }
+        else {
             cout << "Venda cancelada no checkout. Revertendo estoque.\n";
             // Reverter as alterações no estoque
             for (const auto& item : carrinhoOriginal) {
@@ -366,8 +379,6 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
             somaTotal = 0; // Zera o total para indicar que a venda foi cancelada
             somaIVA = 0;
             return false; // Retorna false se a venda for cancelada
-        } else {
-            cout << "Opção inválida. Digite 1 para Sim ou 0 para Não.\n";
         }
     }
     // Esta linha nunca será alcançada devido ao loop while(true), mas é boa prática ter um retorno padrão (embora neste caso, os retornos dentro do loop cobrem todas as possibilidades).
@@ -485,7 +496,8 @@ void venda() {
         numCliente = validacaoInt("Digite o codigo do cliente: ");
 
         imprimirTalao(mat, qtdProdutoVenda, numFatura++, numCliente, somaTotal, somaIVA, valorPago, troco);
-    } else {
+    }
+    else {
         cout << "\nVenda cancelada durante o checkout.\n";
         // Não precisamos fazer mais nada aqui, pois o checkout já cuidou da reversão do estoque
         somaTotal = 0;
@@ -537,34 +549,34 @@ void exibirMenu() {
         cout << linhaSeparadora << endl;
         opcao = validacaoInt("Escolha uma opcao: ");
         switch (opcao) {
-            case 1:
-                // chamar fun��o de venda aqui
-                venda();
-                break;
-            case 2:
-                // chamar fun��o de cria��o
-                adicionarProduto();
-                break;
-            case 3:
-                // chamar fun��o de elimina��o
-                removerProduto();
-                break;
-            case 4:
-                // chamar fun��o mostrar estoque
-                mostrarEstoque();
-                cout << "Prima qualquer tecla...";
-                _getch();
-                break;
-            case 5:
-                cout << "Pressione qualquer tecla..." << endl;
-                _getch();
-                break;
-            default:
-                cout << "Opcao invalida! Tente novamente." << endl;
-                _getch();
-            }
+        case 1:
+            // chamar fun��o de venda aqui
+            venda();
+            break;
+        case 2:
+            // chamar fun��o de cria��o
+            adicionarProduto();
+            break;
+        case 3:
+            // chamar fun��o de elimina��o
+            removerProduto();
+            break;
+        case 4:
+            // chamar fun��o mostrar estoque
+            mostrarEstoque();
+            cout << "Prima qualquer tecla...";
+            _getch();
+            break;
+        case 5:
+            cout << "Pressione qualquer tecla..." << endl;
+            _getch();
+            break;
+        default:
+            cout << "Opcao invalida! Tente novamente." << endl;
+            _getch();
+        }
 
-            cout << endl;
+        cout << endl;
 
     } while (opcao != 5);
 }
