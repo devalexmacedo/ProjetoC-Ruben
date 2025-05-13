@@ -269,12 +269,13 @@ void inicializarMatriz(float**& mat, int qtdProdutoVenda) {
     }
 }
 
-//função para registrar a venda
-bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, const std::vector<int>& produtosVendidos) {
+//função para registrar venda
+bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, vector<int>& produtosVendidos) {
     int idProduto, qtdVenda;
     float precoSemIVA, ivaUnitario, precoUnit, precoTotal, IVA, totalComIVA;
+    bool produtoValido = false;
 
-    while (true) {
+    while (!produtoValido) {
         idProduto = validacaoInt("Digite o id do " + to_string(i + 1) + "º produto: ");
 
         // Verificar se o produto já foi adicionado
@@ -292,41 +293,24 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, const std:
 
         checarProdutoEstoque(idProduto, produtoSelecionado);
         if (!produtoSelecionado) {
-            cout << "Produto nao encontrado.\n";
-            return false;
+            cout << "Produto nao encontrado. Tente novamente.\n"; // Mensagem para tentar novamente
+            continue; // Volta ao início do loop para inserir um novo ID
         }
-        break; // Sai do loop se o produto for encontrado e não repetido
+        produtoValido = true; // Produto encontrado e não repetido, podemos prosseguir
     }
 
     while (true) {
         qtdVenda = validacaoInt("Digite a quantidade de " + produtoSelecionado->nome + " que deseja: ");
 
-        if (qtdVenda > produtoSelecionado->quantidade) {
+        if (qtdVenda == 0) {
+            cout << "Item cancelado.\n";
+            return false;
+        } else if (qtdVenda > produtoSelecionado->quantidade) {
             cout << "Quantidade insuficiente (" << produtoSelecionado->quantidade << " em estoque).\n";
-            qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
-            if (qtdVenda == 0) {
-                cout << "Item cancelado.\n";
-                return false;
-            } else if (qtdVenda > produtoSelecionado->quantidade) {
-                cout << "Quantidade insuficiente (" << produtoSelecionado->quantidade << " em estoque).\nItem cancelado.\n";
-                return false;
-            } else if (qtdVenda <= 0) {
-                cout << "Quantidade inválida.\n";
-                qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
-                if (qtdVenda == 0) {
-                    cout << "Item cancelado.\n";
-                    return false;
-                }
-            } else {
-                break; // Quantidade válida
-            }
-        } else if (qtdVenda <= 0) {
-            cout << "Quantidade inválida.\n";
-            qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
-            if (qtdVenda == 0) {
-                cout << "Item cancelado.\n";
-                return false;
-            }
+            continue; // Solicita a quantidade novamente
+        } else if (qtdVenda < 0) { // Corrigido para verificar se é menor que zero
+            cout << "Quantidade inválida. Digite um número maior ou igual a zero.\n";
+            continue; // Solicita a quantidade novamente
         } else {
             break; // Quantidade válida
         }
@@ -339,13 +323,7 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado, const std:
     IVA = ivaUnitario * qtdVenda;
     totalComIVA = precoTotal;
 
-    mat[i][0] = idProduto; //armazena o id do produto escolhido
-    mat[i][1] = qtdVenda; //armazena a quantidade escolhida
-    mat[i][2] = precoSemIVA; // armazena o preço sem IVA
-    mat[i][3] = IVA; //armazena o IVA total
-    mat[i][4] = totalComIVA; //armazena o valor total com IVA
-    mat[i][5] = precoUnit; //armazena o valor de venda do produto
-
+    produtosVendidos.push_back(idProduto); // Adiciona o ID do produto VÁLIDO ao vetor
     return true;
 }
 
@@ -367,9 +345,9 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
         if (produtoSelecionado) {
             cout << "Produto: " << produtoSelecionado->nome << "\n";
             cout << "Quantidade: " << quantidadeVendida << "\n";
-            cout << "Preço Unitário: " << std::fixed << std::setprecision(2) << mat[i][5] << " euros\n";
-            cout << "Preço s/IVA: " << std::fixed << std::setprecision(2) << mat[i][2] << " euros\n";
-            cout << "IVA (23%): " << std::fixed << std::setprecision(2) << mat[i][3] / quantidadeVendida << " euros\n";
+            cout << "Preço Unitário: " << fixed << setprecision(2) << mat[i][5] << " euros\n";
+            cout << "Preço s/IVA: " << fixed << setprecision(2) << mat[i][2] << " euros\n";
+            cout << "IVA (23%): " << fixed << setprecision(2) << mat[i][3] / quantidadeVendida << " euros\n";
             cout << "---------------------------------\n";
 
             carrinhoOriginal.push_back({idProduto, quantidadeVendida});
@@ -380,14 +358,14 @@ bool checkout(float** mat, int qtdProdutoVenda, float& somaTotal, float& somaIVA
         }
     }
 
-    cout << "Subtotal s/IVA: " << std::fixed << std::setprecision(2) << somaTotal - somaIVA << " euros\n";
-    cout << "Total IVA: " << std::fixed << std::setprecision(2) << somaIVA << " euros\n";
-    cout << "Total c/IVA: " << std::fixed << std::setprecision(2) << somaTotal << " euros\n\n";
+    cout << "Subtotal s/IVA: " << fixed << setprecision(2) << somaTotal - somaIVA << " euros\n";
+    cout << "Total IVA: " << fixed << setprecision(2) << somaIVA << " euros\n";
+    cout << "Total c/IVA: " << fixed << setprecision(2) << somaTotal << " euros\n\n";
 
     while (true) {
         do {
             cout << "Confirmar compra (Y - Sim) ou Desistir da venda (N - Não)? ";
-            getline(std::cin, input);
+            getline(cin, input);
             if (!input.empty()) {
                 confirmacao = input[0];
             } else {
@@ -473,10 +451,9 @@ void venda() {
             break; // Sai do loop se a entrada for válida
         }
         else {
-            cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\nPrima ENTER.";
+            cout << "Quantidade invalida. Por favor, insira uma quantidade que exista no estoque.\nPressione Enter para continuar...";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            _getch(); // Usar _getch() para pausar
         }
     }
 
