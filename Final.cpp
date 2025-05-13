@@ -203,9 +203,19 @@ void adicionarProduto() {
 
     for (int i = 0; i < tamanho; i++) {
         if (toMinuscula(estoque[i].nome) == toMinuscula(nome)) {  // Compara o nome do produto com cada item do estoque. Se encontrar um igual, deixa de adicionar e come�a a alterar o produto existente
+            char opt;
             cout << "PRODUTO - " << estoque[i];
             valorAdd = validacaoInt("Adicione ao stock: "); // O user pode adicionar 0 ao estoque para não o forçar a adicionar caso tenha feito um erro
             estoque[i].quantidade += valorAdd;
+            do { // Pergunta se o user quer atualizar o preço
+                cout << "Deseja atualizar o preço?(Y/N) ";
+                cin >> opt;
+            } while (opt != 'y' && opt != 'n' && opt != 'Y' && opt != 'N');
+
+            if (opt == 'y' || opt == 'Y') {
+                estoque[i].precoCusto = obterFloat("Insira o novo preço: ");
+            }
+
             cout << "Artigo atualizado.";
             existe = true;
             break;
@@ -277,7 +287,7 @@ bool registrarVenda(int i, float** mat, Produto*& produtoSelecionado) {
             return false;
         }
     }
-    else if (qtdVenda >= 0) {
+    else if (qtdVenda <= 0) {
         cout << "Quantidade invalida.\n";
         qtdVenda = validacaoInt("Digite nova quantidade (ou 0 para cancelar): ");
         if (qtdVenda == 0) {
@@ -383,7 +393,7 @@ void venda() {
     while (true) {
         qtdProdutoVenda = validacaoInt("Inserir a quantidade de produtos a serem vendidos: ");
 
-        if (cin.good() && qtdProdutoVenda > 0) {
+        if (qtdProdutoVenda > 0) {
             break; // Sai do loop se a entrada for válida
         }
         else {
@@ -421,13 +431,14 @@ void venda() {
         while (true) {
             valorPago = obterFloat("Insira o valor pago pelo cliente: ");
 
-            if (cin.good() && valorPago > somaTotal) {
+            if (valorPago >= somaTotal) {
                 break; // Sai do loop se a entrada for válida
             }
             else {
-                cout << "Valor pago não pode ser menor que o total a pagar.\n";
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                do {
+                    valorPago = obterFloat("Valor pago não pode ser menor que o total a pagar\nInsira o valor pago pelo cliente: ");
+                } while (valorPago < somaTotal);
+                break;
             }
         }
     }
